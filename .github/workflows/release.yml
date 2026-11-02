@@ -14,7 +14,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
@@ -34,28 +34,58 @@ jobs:
           unzip -q Godot_v${V}_export_templates.tpz
           mv templates ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
           ./godot --version
+          python3 -m pip install --quiet pillow
 
-      - name: Import assets (headless)
+      - name: Import assets with VRAM compression (headless)
         run: |
-          # first import pass; a non-zero exit from the editor on first import is tolerated, the export below verifies
-          timeout 90m ~/godot/godot --headless --path . --import || true
+          set -e
+          python3 tools/fix-texture-imports.py
+          timeout 100m ~/godot/godot --headless --path . --import || true
+          # the glTF importer may rewrite .import files of textures it extracts: enforce again, re-import
+          python3 tools/fix-texture-imports.py
+          timeout 100m ~/godot/godot --headless --path . --import || true
           test -d .godot/imported
+
+      - name: Check texture compression (fail on uncompressed textures > 256 px)
+        run: python3 tools/check-ctex.py
 
       - name: Export and package (Linux + Windows, embedded PCK)
         run: GODOT=$HOME/godot/godot sh tools/package.sh
+
+      - name: Automated playthrough of the exported Linux build (headless, every zone, both branches, bosses)
+        run: |
+          set -o pipefail
+          cd build/linux
+          BENCH_OUT=$PWD/autotest.txt timeout 60m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --autotest 2>&1 | tee autotest.log | grep -E "LOAD_TIME_MS|BENCH_STUCK|SCRIPT ERROR|zones:" || true
+          echo "---- errors (exit-time leak reports excluded) ----"
+          grep -E "SCRIPT ERROR|^ERROR" autotest.log | grep -vE "leaked|still in use at exit|Pages in use" | sort | uniq -c | head -40 || true
+          grep -q "stuck: 0" autotest.log
+          grep -E "zones: 30 " autotest.log
+          ! grep -q "SCRIPT ERROR" autotest.log
+          ! grep -q "not supported by hardware" autotest.log
+          grep -E "LOAD_TIME_MS=" autotest.log
 
       - name: Check packages
         run: |
           tar -tzvf dist/MishmeretLayla-linux.tar.gz
           unzip -l dist/MishmeretLayla-windows.zip
-          test "$(stat -c %s build/linux/MishmeretLayla.x86_64)" -gt 100000000
-          test "$(stat -c %s build/windows/MishmeretLayla.exe)" -gt 100000000
+          ls -la dist build/linux build/windows
+          test -x build/linux/MishmeretLayla.x86_64
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: logs
+          path: |
+            build/linux/autotest.log
+            build/linux/autotest.txt
+          if-no-files-found: ignore
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          sed "s/{TAG}/$GITHUB_REF_NAME/g" .github/release-notes.md > notes.md
           gh release create "$GITHUB_REF_NAME" dist/MishmeretLayla-linux.tar.gz dist/MishmeretLayla-windows.zip \
-            --title "משמרת לילה — מהדורת PC $GITHUB_REF_NAME" \
-            --notes-file .github/release-notes.md
+            --title "משמרת לילה — מהדורת PC $GITHUB_REF_NAME" --notes-file notes.md --latest

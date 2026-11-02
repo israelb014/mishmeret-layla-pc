@@ -11,7 +11,7 @@ const PRESETS := {
 }
 
 var data := {
-	"display": "fullscreen", # window | fullscreen | borderless
+	"display": "borderless", # window | fullscreen | borderless
 	"resolution": "", # "" = native
 	"vsync": true,
 	"fps_limit": 0, # 0 = unlimited, else 60/120/144
@@ -22,9 +22,21 @@ var data := {
 	"unlocked": 1, "highscores": [],
 }
 signal changed(key: String)
+## Display mode forced from the command line for this launch only (never saved):
+## "--windowed"/"-w" or "--fullscreen"/"-f". Overrides the saved display settings.
+var cli_display := ""
 
 func _ready() -> void:
 	_load()
+	var args := OS.get_cmdline_args() + OS.get_cmdline_user_args()
+	if args.has("--windowed") or args.has("-w"):
+		cli_display = "window"
+	elif args.has("--fullscreen") or args.has("-f"):
+		cli_display = "borderless"
+	elif DisplayServer.get_name() != "headless" and get_window().mode == Window.MODE_WINDOWED \
+			and int(ProjectSettings.get_setting("display/window/size/mode", 0)) != Window.MODE_WINDOWED:
+		# the engine consumed a windowed-mode argument before scripts could see it
+		cli_display = "window"
 
 func _load() -> void:
 	var cfg := ConfigFile.new()
@@ -44,6 +56,8 @@ func g(key: String):
 
 func set_value(key: String, v) -> void:
 	data[key] = v
+	if key == "display" or key == "resolution":
+		cli_display = "" # the player chose a mode in the settings screen
 	save()
 	changed.emit(key)
 
@@ -86,11 +100,14 @@ func apply_display() -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	var w := get_window()
-	match String(data["display"]):
+	var mode := cli_display if cli_display != "" else String(data["display"])
+	match mode:
 		"window":
 			w.mode = Window.MODE_WINDOWED
 			w.borderless = false
 			var r := String(data["resolution"])
+			if r == "" and cli_display == "window":
+				r = "1280x720"
 			if r != "":
 				var p := r.split("x")
 				w.size = Vector2i(int(p[0]), int(p[1]))

@@ -24,6 +24,7 @@ var crosshair := TextureRect.new()
 var callouts := VBoxContainer.new()
 var title_layer := Control.new()
 var perf_label := Label.new()
+var loading_status: Label
 # HUD widgets
 var shields_box := HBoxContainer.new()
 var score_label: Label
@@ -437,8 +438,14 @@ func loading() -> Ring:
 	r.custom_minimum_size = Vector2(220, 220)
 	r.font = font_title; r.font_size = 50; r.thickness = 12
 	r.label = "0%"; r.sub = "טוען"
+	r.set_process(false)
+	r.glide_to(0.0)
 	var rc := CenterContainer.new(); rc.add_child(r)
 	v.add_child(rc)
+	loading_status = _label("טוען", 26, false, AMBER)
+	loading_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	loading_status.text_direction = Control.TEXT_DIRECTION_RTL
+	v.add_child(loading_status)
 	var logo := _label("משמרת לילה", 84, true)
 	logo.add_theme_color_override("font_shadow_color", Color("#b4570b")); logo.add_theme_constant_override("shadow_offset_y", 5)
 	logo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -448,6 +455,13 @@ func loading() -> Ring:
 	v.add_child(tip)
 	c.add_child(v)
 	return r
+
+## progress 0..1 with real per-file progress, plus a Hebrew status line
+func set_loading(r, frac: float, status := "") -> void:
+	if not is_instance_valid(r): return
+	r.glide_to(clampf(frac, 0.0, 1.0))
+	if status != "" and is_instance_valid(loading_status) and loading_status.text != status:
+		loading_status.text = status
 
 func menu() -> void:
 	var c := _screen()

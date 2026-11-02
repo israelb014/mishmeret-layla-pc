@@ -12,7 +12,7 @@
 ### Linux (נבדק על Linux Mint)
 
 ```bash
-wget https://github.com/israelb014/mishmeret-layla-pc/releases/download/v1.0.0/MishmeretLayla-linux.tar.gz
+wget https://github.com/israelb014/mishmeret-layla-pc/releases/download/v1.0.1/MishmeretLayla-linux.tar.gz
 mkdir -p ~/Games/MishmeretLayla && tar -xzf MishmeretLayla-linux.tar.gz -C ~/Games/MishmeretLayla
 ~/Games/MishmeretLayla/install-desktop-entry.sh && ~/Games/MishmeretLayla/MishmeretLayla.x86_64
 ```
@@ -21,7 +21,7 @@ mkdir -p ~/Games/MishmeretLayla && tar -xzf MishmeretLayla-linux.tar.gz -C ~/Gam
 
 ### Windows
 
-מורידים את `MishmeretLayla-windows.zip` מעמוד ה־[Release](https://github.com/israelb014/mishmeret-layla-pc/releases/tag/v1.0.0), מחלצים ומפעילים את `MishmeretLayla.exe`.
+מורידים את `MishmeretLayla-windows.zip` מעמוד ה־[Release](https://github.com/israelb014/mishmeret-layla-pc/releases/tag/v1.0.1), מחלצים ומפעילים את `MishmeretLayla.exe`.
 
 ## דרישות מערכת
 

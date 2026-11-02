@@ -28,3 +28,17 @@ func _draw() -> void:
 func set_value(v: float) -> void:
 	value = v
 	queue_redraw()
+
+## Loading screen: the arc glides toward the real progress instead of jumping between frames.
+var target := -1.0
+func glide_to(v: float) -> void:
+	target = maxf(v, target)
+	set_process(true)
+
+func _process(dt: float) -> void:
+	if target < 0.0:
+		set_process(false)
+		return
+	value = move_toward(value, target, maxf(0.6, (target - value) * 6.0) * dt)
+	label = "%d%%" % int(round(value * 100.0))
+	queue_redraw()

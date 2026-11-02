@@ -14,6 +14,12 @@ var ft_i := 0
 var perf_visible := false
 var final_rank := "B"
 var prebuilt := {}
+var stage_assets: Dictionary = {} # data/stage_assets.json: common prefabs + per-stage prefabs
+var loading := false # a loading screen is up: Esc quits
+var streaming: Array = [] # resource paths of stages 2-3 being loaded in the background
+var stream_tick := 0
+var load_time_reported := false
+const STATUS := {"tex": "טוען טקסטורות", "char": "טוען דמויות ואנימציות", "model": "טוען מודלים", "sky": "טוען שמיים"}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -28,10 +34,6 @@ func _ready() -> void:
 	game.setup(self)
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	var args := OS.get_cmdline_args() + OS.get_cmdline_user_args()
-	if args.has("--windowed"):
-		Settings.data["display"] = "window"
-		Settings.data["resolution"] = "1280x720"
-		Settings.apply_display()
 	if args.has("--benchmark"):
 		bench = {"kind": "benchmark", "results": []}
 		Settings.apply_preset("high")
@@ -43,57 +45,123 @@ func _ready() -> void:
 	await _boot()
 
 func _boot() -> void:
+	loading = true
+	stage_assets = U.load_json("res://data/stage_assets.json")
 	var ring := ui.loading()
-	await load_everything(func(p): ring.set_value(p); ring.label = "%d%%" % int(p * 100); ring.queue_redraw())
+	# startup: only what the main menu and stage 1 need (stages 2-3 stream in later)
+	var groups := _common_groups()
+	var s1 := _stage_groups(0)
+	for k in s1: groups[k].append_array(s1[k])
+	await load_groups(groups, func(f, st): ui.set_loading(ring, 0.8 * f, st))
+	var names: Array = (stage_assets["common"] as Array) + (stage_assets["stages"][0] as Array)
+	await _prepare_prefabs(names, func(f): ui.set_loading(ring, 0.8 + 0.15 * f, "מכין מודלים"))
+	Character.init_library()
+	ui.set_loading(ring, 0.97, "מכין אפקטים")
+	await game.make_graffiti_textures()
+	ui.set_loading(ring, 1.0)
+	print("[load] startup assets ready ", Time.get_ticks_msec(), " ms")
 	if not bench.is_empty():
 		await _run_bench()
 		return
 	await show_menu()
 
-## Threaded loading of every asset with real progress.
-func load_everything(progress: Callable) -> void:
-	var paths: Array = []
-	for n in game.prefabs.all_names(): paths.append(game.prefabs.path_of(n))
-	for m in Character.OUTFIT_MATS.keys(): paths.append("res://assets/chars/%s.glb" % m)
-	paths.append("res://assets/anims/anims.glb")
-	for s in Materials.SETS:
-		for p in game.mats.textures_of(s): paths.append(p)
-	for h in ["afternoon", "sunset", "night"]: paths.append("res://assets/hdr/%s.hdr" % h)
-	for p in paths:
-		ResourceLoader.load_threaded_request(p, "", true)
-	var done := 0
-	while done < paths.size():
-		done = 0
+func _empty_groups() -> Dictionary:
+	return {"tex": [], "char": [], "model": [], "sky": []}
+
+func _common_groups() -> Dictionary:
+	var g := _empty_groups()
+	for s in Materials.SETS: g["tex"].append_array(game.mats.textures_of(s))
+	for m in Character.OUTFIT_MATS.keys(): g["char"].append("res://assets/chars/%s.glb" % m)
+	g["char"].append("res://assets/anims/anims.glb")
+	for n in stage_assets["common"]: g["model"].append(game.prefabs.path_of(n))
+	return g
+
+func _stage_groups(i: int) -> Dictionary:
+	var g := _empty_groups()
+	for n in stage_assets["stages"][i]: g["model"].append(game.prefabs.path_of(n))
+	g["sky"].append("res://assets/hdr/%s.hdr" % game.stages[i]["hdri"])
+	return g
+
+## Loads resources on worker threads. progress(fraction, status) runs every frame with real
+## per-file progress, so the loading screen never freezes. Paths already streamed are reused.
+func load_groups(groups: Dictionary, progress: Callable) -> void:
+	var all: Array = []
+	var kinds: Array = []
+	for k in ["tex", "char", "model", "sky"]:
+		for p in groups[k]:
+			if loaded.has(p) or all.has(p): continue
+			all.append(p); kinds.append(k)
+			if not streaming.has(p):
+				ResourceLoader.load_threaded_request(p, "", true)
+	while not all.is_empty():
 		var frac := 0.0
-		for p in paths:
+		var left := 0
+		var pending := ""
+		for i in all.size():
 			var prog := []
-			var st := ResourceLoader.load_threaded_get_status(p, prog)
-			if st == ResourceLoader.THREAD_LOAD_LOADED or st == ResourceLoader.THREAD_LOAD_FAILED:
-				done += 1; frac += 1.0
-			else:
+			var st := ResourceLoader.load_threaded_get_status(all[i], prog)
+			if st == ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				left += 1
 				frac += float(prog[0]) if prog.size() > 0 else 0.0
-		progress.call(0.85 * frac / paths.size())
+				if pending == "": pending = kinds[i]
+			else:
+				frac += 1.0
+		progress.call(frac / all.size(), STATUS.get(pending, "טוען"))
+		if left == 0: break
 		await get_tree().process_frame
-	for p in paths:
-		loaded[p] = ResourceLoader.load_threaded_get(p)
-	Character.init_library()
-	await game.make_graffiti_textures()
-	# normalise every prefab once
-	var names: Array = game.prefabs.all_names()
+	for p in all:
+		var r = ResourceLoader.load_threaded_get(p)
+		if r != null: loaded[p] = r
+		else: push_error("failed to load " + p)
+		streaming.erase(p)
+	progress.call(1.0, "")
+
+## Normalises prefab templates, yielding a frame whenever ~12 ms were spent (UI stays live).
+func _prepare_prefabs(names: Array, progress: Callable) -> void:
+	var t := Time.get_ticks_usec()
 	for i in names.size():
 		game.prefabs.prepare(names[i])
-		if i % 12 == 0:
-			progress.call(0.85 + 0.15 * float(i) / names.size())
+		if Time.get_ticks_usec() - t > 12000:
+			progress.call(float(i + 1) / names.size())
 			await get_tree().process_frame
+			t = Time.get_ticks_usec()
 	progress.call(1.0)
-	print("[load] assets ready ", paths.size())
+
+## Background loading of stages 2 and 3 while stage 1 is played (low priority, no sub-threads).
+func start_streaming() -> void:
+	for i in [1, 2]:
+		var g := _stage_groups(i)
+		for k in g:
+			for p in g[k]:
+				if loaded.has(p) or streaming.has(p): continue
+				ResourceLoader.load_threaded_request(p, "", false)
+				streaming.append(p)
+
+func _stream_poll() -> void:
+	stream_tick += 1
+	if streaming.is_empty() or stream_tick % 20 != 0: return
+	var i := streaming.size() - 1
+	while i >= 0:
+		var p: String = streaming[i]
+		if ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			var r = ResourceLoader.load_threaded_get(p)
+			if r != null: loaded[p] = r
+			streaming.remove_at(i)
+		i -= 1
+
+func _report_load_time() -> void:
+	if load_time_reported: return
+	load_time_reported = true
+	print("LOAD_TIME_MS=%d" % Time.get_ticks_msec())
 
 ## Stage loading screen: build every zone (both branches), pool characters, warm shaders.
 func prepare_stage(index: int) -> void:
 	print("[load] stage ", index)
+	loading = true
 	var ring := ui.loading()
-	ring.label = "0%"
 	var st: Dictionary = game.stages[index]
+	await load_groups(_stage_groups(index), func(f, s): ui.set_loading(ring, 0.25 * f, s))
+	await _prepare_prefabs(stage_assets["stages"][index], func(f): ui.set_loading(ring, 0.25 + 0.05 * f, "מכין מודלים"))
 	var defs: Array = []
 	for z in st["zones"]:
 		defs.append(z)
@@ -105,7 +173,7 @@ func prepare_stage(index: int) -> void:
 	var models := counts.keys()
 	for mi in models.size():
 		game.pools.warm(models[mi], mini(8, int(counts[models[mi]]) + 2))
-		ring.set_value(0.3 * float(mi + 1) / models.size()); ring.label = "%d%%" % int(ring.value * 100)
+		ui.set_loading(ring, 0.3 + 0.1 * float(mi + 1) / models.size(), "מכין דמויות")
 		await get_tree().process_frame
 	for old in game.prebuilt.values():
 		if is_instance_valid(old) and not old.is_inside_tree(): old.free()
@@ -118,11 +186,12 @@ func prepare_stage(index: int) -> void:
 		z.build()
 		game.setup_rig(z)
 		game.prebuilt[String(defs[i]["id"])] = z
-		ring.set_value(0.3 + 0.5 * float(i + 1) / defs.size()); ring.label = "%d%%" % int(ring.value * 100)
+		ui.set_loading(ring, 0.4 + 0.35 * float(i + 1) / defs.size(), "בונה את השלב")
 		await get_tree().process_frame
 	print("[load] zones built ", defs.size())
-	await warm_up(st, ring)
+	await warm_up(st, func(f): ui.set_loading(ring, 0.75 + 0.25 * f, "מכין אפקטים"))
 	print("[load] warm-up done")
+	loading = false
 
 func _count_models(v, counts: Dictionary) -> void:
 	if v is Dictionary:
@@ -145,20 +214,35 @@ func _count_models(v, counts: Dictionary) -> void:
 	for m in ["beach", "woman", "farmer", "casual"]:
 		counts[m] = maxi(int(counts.get(m, 0)), 2)
 
-## Render everything once off-screen (behind the loading screen) so all shader pipelines
-## and particle materials are compiled before gameplay starts.
-func warm_up(st: Dictionary, ring: Ring) -> void:
+## Renders the current stage's materials, characters and effects once off-screen (behind the
+## loading screen) so their shaders and pipelines are compiled before play. One zone per step,
+## so the progress ring keeps moving; compiled shaders/pipelines are cached on disk by Godot
+## (shader cache + Vulkan pipeline cache), which makes the next launch much faster.
+func warm_up(st: Dictionary, progress: Callable) -> void:
 	game.setup_stage(game.stage_index)
 	var cam := game.camera
-	cam.global_position = Vector3(0, 1.7, 8)
-	cam.look_at(Vector3(0, 1.5, 0))
-	var temp := []
-	for z in game.prebuilt.values():
-		z.position = Vector3(0, 0, 0)
+	var fov := cam.fov
+	cam.fov = 100.0
+	var zones: Array = game.prebuilt.values()
+	var total := zones.size() + 2
+	var views := [[Vector3(0, 3, 10), Vector3(0, 1.5, -20)], [Vector3(0, 35, 22), Vector3(0, 0, -30)], [Vector3(0, 3, -60), Vector3(0, 1.5, -20)]]
+	for zi in zones.size():
+		var z: Zone = zones[zi]
+		z.position = Vector3.ZERO
 		# probe updates take several frames; never queue one for a zone that is detached right after
 		if z.probe: z.probe.visible = false
 		game.stage_root.add_child(z)
-		temp.append(z)
+		for v in views:
+			cam.global_position = v[0]
+			cam.look_at(v[1])
+			await _draw_frame()
+		game.stage_root.remove_child(z)
+		z.position = Vector3(0, 0, -100000)
+		if z.probe: z.probe.visible = true
+		progress.call(float(zi + 1) / total)
+	cam.fov = fov
+	cam.global_position = Vector3(0, 1.7, 8)
+	cam.look_at(Vector3(0, 1.5, 0))
 	var chars := game.pools.all_characters()
 	for i in chars.size():
 		var c: Character = chars[i]
@@ -166,22 +250,23 @@ func warm_up(st: Dictionary, ring: Ring) -> void:
 		c.position = Vector3((i % 8) - 4.0, 0, -2.0 - int(i / 8))
 		c.configure(game, {"rim": true, "rim_strength": 0.5, "weapon": "pistol"})
 	game.pools.visible = true
+	await _draw_frame()
+	progress.call(float(zones.size() + 1) / total)
 	game.fx.warm_up(Vector3(0, 1.5, 0))
-	for f in 6:
-		cam.rotate_y(TAU / 6.0)
-		ring.set_value(0.8 + 0.2 * (f + 1) / 6.0); ring.label = "%d%%" % int(ring.value * 100)
-		await get_tree().process_frame
-		if DisplayServer.get_name() != "headless":
-			await RenderingServer.frame_post_draw
-	for z in temp:
-		game.stage_root.remove_child(z)
-		z.position = Vector3(0, 0, -100000)
-		if z.probe: z.probe.visible = true
+	for f in 3:
+		cam.rotate_y(TAU / 3.0)
+		await _draw_frame()
 	for c in chars:
 		c.visible = false
 		c.detach_weapon()
 	game.pools.visible = false
 	game.fx.clear()
+	progress.call(1.0)
+
+func _draw_frame() -> void:
+	await get_tree().process_frame
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
 
 # ------------------------------------------------------------------ menu / runs
 func show_menu() -> void:
@@ -199,6 +284,8 @@ func show_menu() -> void:
 	_fly_menu(path, look)
 	ui.menu()
 	Sfx.play_music("menu")
+	_report_load_time()
+	start_streaming()
 
 func _fly_menu(path: Array, look: Vector3) -> void:
 	if mode != "menu": return
@@ -289,6 +376,10 @@ func finish_run() -> void:
 		ui.highscores(-1, quit_to_menu)
 
 # ------------------------------------------------------------------ input & loop
+func _input(e: InputEvent) -> void:
+	if loading and e is InputEventKey and (e as InputEventKey).pressed and (e as InputEventKey).keycode == KEY_ESCAPE:
+		get_tree().quit()
+
 func _unhandled_input(e: InputEvent) -> void:
 	if e.is_action_pressed("perf"):
 		perf_visible = not perf_visible
@@ -306,6 +397,9 @@ func _unhandled_input(e: InputEvent) -> void:
 		game.reload()
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		get_tree().quit()
+		return
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT and mode == "game" and not game.paused and bench.is_empty():
 		toggle_pause()
 
@@ -322,6 +416,7 @@ func _process(dt: float) -> void:
 		ui.perf_label.text = "FPS %.0f   1%% low %.0f   worst %.1f ms   draws %d" % [s["avg"], s["low1"], s["worst"] * 1000.0, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)]
 	if bench.has("zone_times"): bench["zone_times"].append(dt)
 	_auto_probe(dt)
+	_stream_poll()
 
 ## "אוטומטי": measures 5 s of the menu fly-through once and picks the preset (result is saved).
 var probe_t := -1.0
@@ -398,6 +493,7 @@ func _bench_next() -> void:
 	game.dev_god = true
 	mode = "game"
 	await prepare_stage(p["stage"])
+	_report_load_time()
 	ui.clear_screen()
 	game.new_run("normal", p["stage"], p["zone"], p["zone"] > 0)
 	autoplay = Autoplay.new(); autoplay.setup(self); game.autoplay = autoplay

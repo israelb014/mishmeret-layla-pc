@@ -1,10 +1,10 @@
-## משמרת לילה — מהדורת PC 1.0.0
+## משמרת לילה — מהדורת PC {TAG}
 
 משחק יריות ארקייד על מסילה, בעברית, ל־Linux ול־Windows (Godot 4.7.2, Forward+ / Vulkan).
 
 ### Linux Mint
 ```bash
-wget https://github.com/israelb014/mishmeret-layla-pc/releases/download/v1.0.0/MishmeretLayla-linux.tar.gz
+wget https://github.com/israelb014/mishmeret-layla-pc/releases/download/{TAG}/MishmeretLayla-linux.tar.gz
 mkdir -p ~/Games/MishmeretLayla && tar -xzf MishmeretLayla-linux.tar.gz -C ~/Games/MishmeretLayla
 ~/Games/MishmeretLayla/install-desktop-entry.sh && ~/Games/MishmeretLayla/MishmeretLayla.x86_64
 ```
