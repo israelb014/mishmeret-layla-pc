@@ -47,7 +47,9 @@ jobs:
           test -d .godot/imported
 
       - name: Check texture compression (fail on uncompressed textures > 256 px)
-        run: python3 tools/check-ctex.py
+        run: |
+          python3 tools/check-ctex.py
+          echo "imported data: $(du -sh .godot/imported | cut -f1)"; ls -S -l .godot/imported | head -15
 
       - name: Export and package (Linux + Windows, embedded PCK)
         run: GODOT=$HOME/godot/godot sh tools/package.sh

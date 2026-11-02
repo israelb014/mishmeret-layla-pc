@@ -20,6 +20,41 @@ def setp(text, key, value):
         return pat.sub(line, text)
     return text.replace('[params]\n', '[params]\n\n' + line + '\n', 1)
 
+STUB = '''[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+
+[deps]
+
+source_file="res://%s"
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+process/fix_alpha_border=true
+process/size_limit=0
+detect_3d/compress_to=0
+'''
+# images that have no .import yet (e.g. the shared prop textures) get one before Godot sees them,
+# otherwise Godot would create them with its lossless + detect_3d defaults
+created = 0
+for root, dirs, files in os.walk('assets'):
+    for f in files:
+        if f.lower().endswith(('.jpg', '.jpeg', '.png')) and not os.path.exists(os.path.join(root, f) + '.import'):
+            src = os.path.join(root, f)
+            open(src + '.import', 'w').write(STUB % src.replace(os.sep, '/'))
+            created += 1
+print('new .import files:', created)
+
 changed = 0
 small = 0
 for root, dirs, files in os.walk('.'):
@@ -39,6 +74,9 @@ for root, dirs, files in os.walk('.'):
             w, h = Image.open(src).size
             if max(w, h) <= 256:
                 small += 1
+                new = setp(setp(text, 'compress/mode', 0), 'detect_3d/compress_to', 0)
+                if new != text:
+                    open(path, 'w').write(new)
                 continue
         new = text
         new = setp(new, 'compress/mode', 2)
