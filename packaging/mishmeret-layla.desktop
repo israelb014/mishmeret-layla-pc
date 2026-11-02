@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=משמרת לילה
+Name[en]=Mishmeret Layla
+Comment=משחק יריות ארקייד על מסילה
+Comment[en]=Arcade rail shooter
+Exec=MishmeretLayla.x86_64
+Icon=mishmeret-layla
+Terminal=false
+Categories=Game;ActionGame;
+StartupWMClass=Godot

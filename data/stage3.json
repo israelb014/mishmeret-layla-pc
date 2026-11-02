@@ -1,0 +1,2701 @@
+{
+ "id": 3,
+ "title": "תחנת הרכבת",
+ "subtitle": "לילה, ניאון ומנהרות",
+ "hdri": "night",
+ "music": "stage3",
+ "target": 50000,
+ "night": true,
+ "fog": [
+  1450030,
+  40,
+  190
+ ],
+ "sun": {
+  "color": 10336511,
+  "intensity": 0.9,
+  "dir": [
+   0.4,
+   0.8,
+   0.3
+  ]
+ },
+ "hemi": [
+  5925514,
+  2761256,
+  0.6
+ ],
+ "exposure": 1,
+ "bloom": 0.4,
+ "bloomThreshold": 2.2,
+ "envIntensity": 0.8,
+ "bgIntensity": 0.45,
+ "bgBlur": 0.12,
+ "dust": 10133672,
+ "rim": 8382975,
+ "rimStrength": 0.9,
+ "start": {
+  "pos": [
+   0,
+   0,
+   0
+  ],
+  "yaw": 0
+ },
+ "intro": {
+  "path": [
+   [
+    -10,
+    22,
+    30
+   ],
+   [
+    6,
+    10,
+    6
+   ],
+   [
+    1,
+    4,
+    -4
+   ],
+   [
+    0,
+    1.7,
+    -2
+   ]
+  ],
+  "look": [
+   0,
+   3,
+   -30
+  ],
+  "duration": 6
+ },
+ "menuPath": [
+  [
+   0,
+   6,
+   20
+  ],
+  [
+   0,
+   5,
+   -30
+  ]
+ ],
+ "zones": [
+  {
+   "id": "3-1",
+   "name": "כיכר התחנה",
+   "seed": 31,
+   "par": 18,
+   "set": [
+    {
+     "kind": "plaza",
+     "x": 0,
+     "z": -20,
+     "w": 44,
+     "d": 44,
+     "color": 14209736
+    },
+    {
+     "kind": "hall",
+     "x": 0,
+     "z": -58,
+     "w": 40,
+     "d": 26,
+     "h": 12,
+     "floor": 15131612,
+     "wall": 13226970
+    }
+   ],
+   "props": [
+    [
+     "neon",
+     0,
+     -44.6,
+     0,
+     {
+      "text": "תחנת הרכבת",
+      "y": 10,
+      "color": "#2ee6ff",
+      "w": 16,
+      "h": 2.6
+     }
+    ],
+    [
+     "neon",
+     -12,
+     -44.6,
+     0,
+     {
+      "text": "כרטיסים",
+      "y": 6,
+      "color": "#ffd400",
+      "w": 6,
+      "h": 1.2
+     }
+    ],
+    [
+     "neon",
+     12,
+     -44.6,
+     0,
+     {
+      "text": "קפה",
+      "y": 6,
+      "color": "#ff3fb4",
+      "w": 5,
+      "h": 1.2
+     }
+    ],
+    [
+     "ticket",
+     -6,
+     -30,
+     0
+    ],
+    [
+     "ticket",
+     -3.6,
+     -30,
+     0
+    ],
+    [
+     "ticket",
+     3.6,
+     -30,
+     0
+    ],
+    [
+     "ticket",
+     6,
+     -30,
+     0
+    ],
+    [
+     "vending",
+     10,
+     -36,
+     -30
+    ],
+    [
+     "vending",
+     -10,
+     -36,
+     30
+    ],
+    [
+     "palm",
+     -14,
+     -14,
+     0
+    ],
+    [
+     "palm",
+     14,
+     -14,
+     40
+    ],
+    [
+     "palm",
+     -14,
+     -32,
+     0
+    ],
+    [
+     "palm",
+     14,
+     -32,
+     20
+    ],
+    [
+     "bench",
+     -9,
+     -18,
+     90
+    ],
+    [
+     "bench",
+     9,
+     -18,
+     -90
+    ],
+    [
+     "street_light",
+     -8,
+     -8,
+     90
+    ],
+    [
+     "street_light",
+     8,
+     -8,
+     -90
+    ],
+    [
+     "street_light",
+     -8,
+     -26,
+     90
+    ],
+    [
+     "street_light",
+     8,
+     -26,
+     -90
+    ],
+    [
+     "red_barrel",
+     1.4,
+     -32.6,
+     0,
+     {
+      "destructible": "red_barrel"
+     }
+    ],
+    [
+     "escalator",
+     -16,
+     -40,
+     0
+    ],
+    [
+     "escalator",
+     16,
+     -40,
+     0
+    ],
+    [
+     "glass",
+     -2.5,
+     -44.7,
+     0,
+     {
+      "y": 1.6,
+      "w": 4,
+      "h": 3
+     }
+    ],
+    [
+     "glass",
+     2.5,
+     -44.7,
+     0,
+     {
+      "y": 1.6,
+      "w": 4,
+      "h": 3
+     }
+    ],
+    [
+     "car",
+     -18,
+     -6,
+     0,
+     {
+      "type": "car_taxi"
+     }
+    ],
+    [
+     "car",
+     18,
+     -10,
+     180,
+     {
+      "type": "car_sedan"
+     }
+    ]
+   ],
+   "lights": true,
+   "path": [
+    [
+     0,
+     1.7,
+     -2
+    ],
+    [
+     0,
+     1.7,
+     -10
+    ]
+   ],
+   "look": [
+    0,
+    1.8,
+    -30
+   ],
+   "next": [
+    0,
+    0,
+    -44,
+    0
+   ],
+   "waves": [
+    {
+     "events": [
+      {
+       "t": 0,
+       "civ": {
+        "kind": "walk",
+        "from": [
+         -4,
+         0.02,
+         -14
+        ],
+        "to": [
+         -12,
+         0.02,
+         -2
+        ],
+        "model": "woman"
+       }
+      },
+      {
+       "t": 0.4,
+       "civ": {
+        "kind": "walk",
+        "from": [
+         5,
+         0.02,
+         -36
+        ],
+        "to": [
+         6,
+         0.02,
+         -12
+        ],
+        "model": "casual"
+       }
+      },
+      {
+       "t": 0.6,
+       "enemy": {
+        "kind": "popup",
+        "model": "punk",
+        "outfit": "purple",
+        "pos": [
+         -4.8,
+         0.02,
+         -31.5
+        ]
+       }
+      },
+      {
+       "t": 1.4,
+       "enemy": {
+        "kind": "popup",
+        "model": "punkf",
+        "outfit": "teal",
+        "pos": [
+         4.8,
+         0.02,
+         -31.5
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "look": [
+      0,
+      2.6,
+      -36
+     ],
+     "events": [
+      {
+       "t": 0.2,
+       "enemy": {
+        "kind": "runout",
+        "model": "suit",
+        "outfit": "white",
+        "from": [
+         -12,
+         0.02,
+         -42
+        ],
+        "pos": [
+         -5,
+         0.02,
+         -38
+        ]
+       }
+      },
+      {
+       "t": 0.8,
+       "enemy": {
+        "kind": "jumpdown",
+        "model": "adventurer",
+        "outfit": "yellow",
+        "from": [
+         16,
+         4.2,
+         -42
+        ],
+        "pos": [
+         10,
+         0.02,
+         -36.5
+        ]
+       }
+      },
+      {
+       "t": 1.6,
+       "enemy": {
+        "kind": "knife",
+        "model": "casual",
+        "outfit": "red",
+        "from": [
+         1,
+         0.02,
+         -42
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3-2",
+   "name": "אולם הכרטיסים",
+   "seed": 32,
+   "par": 20,
+   "set": [
+    {
+     "kind": "hall",
+     "x": 0,
+     "z": -22,
+     "w": 30,
+     "d": 44,
+     "h": 9,
+     "floor": 15789800,
+     "wall": 14673642,
+     "back": false
+    }
+   ],
+   "props": [
+    [
+     "neon",
+     0,
+     -43.5,
+     0,
+     {
+      "text": "רציפים",
+      "y": 7.2,
+      "color": "#2ee6ff",
+      "w": 8,
+      "h": 1.4
+     }
+    ],
+    [
+     "neon",
+     -14.7,
+     -20,
+     90,
+     {
+      "text": "יציאה",
+      "y": 6,
+      "color": "#8cff3a",
+      "w": 4,
+      "h": 1
+     }
+    ],
+    [
+     "neon",
+     14.7,
+     -26,
+     -90,
+     {
+      "text": "מודיעין",
+      "y": 6,
+      "color": "#ffd400",
+      "w": 5,
+      "h": 1
+     }
+    ],
+    [
+     "glass",
+     -5,
+     -18,
+     0,
+     {
+      "y": 1.4,
+      "w": 5,
+      "h": 2.6
+     }
+    ],
+    [
+     "glass",
+     5,
+     -18,
+     0,
+     {
+      "y": 1.4,
+      "w": 5,
+      "h": 2.6
+     }
+    ],
+    [
+     "glass",
+     -10,
+     -30,
+     90,
+     {
+      "y": 1.4,
+      "w": 4,
+      "h": 2.6
+     }
+    ],
+    [
+     "ticket",
+     -12,
+     -10,
+     90
+    ],
+    [
+     "ticket",
+     -12,
+     -12.4,
+     90
+    ],
+    [
+     "vending",
+     12.5,
+     -10,
+     -90
+    ],
+    [
+     "vending",
+     12.5,
+     -12.2,
+     -90
+    ],
+    [
+     "bench_metal",
+     -3,
+     -26,
+     0
+    ],
+    [
+     "bench_metal",
+     3,
+     -26,
+     0
+    ],
+    [
+     "bench_metal",
+     -3,
+     -34,
+     180
+    ],
+    [
+     "bench_metal",
+     3,
+     -34,
+     180
+    ],
+    [
+     "pickup_crate",
+     -8,
+     -36,
+     0,
+     {
+      "destructible": "crate",
+      "weapon": "mpistol"
+     }
+    ],
+    [
+     "red_barrel",
+     6.8,
+     -33.5,
+     0,
+     {
+      "destructible": "red_barrel"
+     }
+    ],
+    [
+     "bin_small",
+     8,
+     -22,
+     0
+    ],
+    [
+     "potted_plant",
+     -13,
+     -40,
+     0
+    ],
+    [
+     "potted_plant",
+     13,
+     -40,
+     0
+    ],
+    [
+     "sign",
+     0,
+     -14,
+     0,
+     {
+      "swing": true,
+      "y": 6.2,
+      "text": "רציפים 1–3",
+      "style": {
+       "bg": "#0d47a1",
+       "fg": "#ffffff"
+      }
+     }
+    ]
+   ],
+   "path": [
+    [
+     0,
+     1.7,
+     -2
+    ],
+    [
+     0,
+     1.7,
+     -8
+    ]
+   ],
+   "look": [
+    0,
+    1.6,
+    -28
+   ],
+   "next": [
+    0,
+    0,
+    -44,
+    0
+   ],
+   "waves": [
+    {
+     "events": [
+      {
+       "t": 0,
+       "civ": {
+        "kind": "panic",
+        "from": [
+         2,
+         0,
+         -24
+        ],
+        "to": [
+         12,
+         0,
+         -6
+        ],
+        "model": "woman"
+       }
+      },
+      {
+       "t": 0.3,
+       "enemy": {
+        "kind": "popup",
+        "model": "punk",
+        "outfit": "yellow",
+        "pos": [
+         -5,
+         0,
+         -20.2
+        ]
+       }
+      },
+      {
+       "t": 1,
+       "enemy": {
+        "kind": "popup",
+        "model": "suit",
+        "outfit": "red",
+        "pos": [
+         5,
+         0,
+         -20.2
+        ]
+       }
+      },
+      {
+       "t": 1.8,
+       "enemy": {
+        "kind": "roll",
+        "model": "punkf",
+        "outfit": "orange",
+        "from": [
+         -12,
+         0,
+         -30
+        ],
+        "pos": [
+         -6,
+         0,
+         -30.5
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "look": [
+      0,
+      1.6,
+      -36
+     ],
+     "events": [
+      {
+       "t": 0.2,
+       "enemy": {
+        "kind": "runacross",
+        "model": "casual",
+        "outfit": "teal",
+        "from": [
+         -12,
+         0,
+         -38
+        ],
+        "pos": [
+         12,
+         0,
+         -39
+        ]
+       }
+      },
+      {
+       "t": 0.6,
+       "enemy": {
+        "kind": "hostage",
+        "model": "adventurer",
+        "outfit": "purple",
+        "pos": [
+         1.5,
+         0,
+         -36
+        ],
+        "hostage": "farmer"
+       }
+      },
+      {
+       "t": 1.3,
+       "enemy": {
+        "kind": "popup",
+        "model": "worker",
+        "outfit": "white",
+        "pos": [
+         6.8,
+         0,
+         -35.4
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3-3",
+   "name": "רציף 2",
+   "seed": 33,
+   "par": 22,
+   "set": [
+    {
+     "kind": "platform",
+     "x": 0,
+     "z": -24,
+     "w": 9,
+     "d": 52,
+     "edges": [
+      -1,
+      1
+     ]
+    },
+    {
+     "kind": "tracks",
+     "x": -7,
+     "z0": 4,
+     "z1": -60
+    },
+    {
+     "kind": "tracks",
+     "x": 7,
+     "z0": 4,
+     "z1": -60
+    },
+    {
+     "kind": "hall",
+     "x": 0,
+     "z": -58,
+     "w": 64,
+     "d": 8,
+     "h": 6,
+     "left": false,
+     "right": false,
+     "floor": 14276303,
+     "wall": 12569039
+    }
+   ],
+   "props": [
+    [
+     "neon",
+     0,
+     -48,
+     0,
+     {
+      "text": "רציף 2",
+      "y": 5,
+      "color": "#ffd400",
+      "w": 5,
+      "h": 1
+     }
+    ],
+    [
+     "display",
+     -3,
+     -16,
+     0,
+     {
+      "y": 4.4
+     }
+    ],
+    [
+     "pillar",
+     -11,
+     -10,
+     0
+    ],
+    [
+     "pillar",
+     11,
+     -10,
+     0
+    ],
+    [
+     "pillar",
+     -11,
+     -34,
+     0
+    ],
+    [
+     "pillar",
+     11,
+     -34,
+     0
+    ],
+    [
+     "red_barrel",
+     -2.6,
+     -31,
+     0,
+     {
+      "destructible": "red_barrel",
+      "y": 1.1
+     }
+    ],
+    [
+     "ticket",
+     2.8,
+     -14,
+     -90,
+     {
+      "y": 1.1
+     }
+    ]
+   ],
+   "path": [
+    [
+     0,
+     2.8,
+     -2
+    ],
+    [
+     0,
+     2.8,
+     -8
+    ]
+   ],
+   "look": [
+    0,
+    2.4,
+    -30
+   ],
+   "waves": [
+    {
+     "events": [
+      {
+       "t": 0,
+       "vehicle": {
+        "name": "train_q",
+        "from": [
+         -7,
+         0,
+         -120
+        ],
+        "to": [
+         -7,
+         0,
+         -30
+        ],
+        "duration": 6,
+        "tint": null,
+        "keep": true,
+        "tintMap": {
+         "^Outside$": 14037034,
+         "^Top$": 15921906,
+         "^Windows$": 1779760,
+         "^Black$": 2039583
+        }
+       }
+      },
+      {
+       "t": 0.4,
+       "enemy": {
+        "kind": "popup",
+        "model": "punk",
+        "outfit": "teal",
+        "pos": [
+         2.4,
+         1.1,
+         -24
+        ]
+       }
+      },
+      {
+       "t": 0.2,
+       "civ": {
+        "kind": "walk",
+        "from": [
+         -2,
+         1.1,
+         -10
+        ],
+        "to": [
+         -2,
+         1.1,
+         -40
+        ],
+        "model": "beach"
+       }
+      }
+     ]
+    },
+    {
+     "look": [
+      -3,
+      3,
+      -30
+     ],
+     "events": [
+      {
+       "t": 0.6,
+       "enemy": {
+        "kind": "jumpdown",
+        "model": "suit",
+        "outfit": "yellow",
+        "from": [
+         -7,
+         4,
+         -26
+        ],
+        "pos": [
+         -3,
+         1.1,
+         -25
+        ]
+       }
+      },
+      {
+       "t": 1.2,
+       "enemy": {
+        "kind": "jumpdown",
+        "model": "punkf",
+        "outfit": "purple",
+        "from": [
+         -7,
+         4,
+         -34
+        ],
+        "pos": [
+         -2.6,
+         1.1,
+         -33
+        ]
+       }
+      },
+      {
+       "t": 1,
+       "pickup": {
+        "type": "shield",
+        "pos": [
+         2.5,
+         2.6,
+         -18
+        ]
+       }
+      },
+      {
+       "t": 2,
+       "enemy": {
+        "kind": "grenade",
+        "model": "casual",
+        "outfit": "orange",
+        "pos": [
+         3,
+         1.1,
+         -40
+        ],
+        "throws": 1
+       }
+      }
+     ]
+    }
+   ],
+   "branch": {
+    "signs": [
+     [
+      -2.4,
+      1.1,
+      -13
+     ],
+     [
+      2.4,
+      1.1,
+      -13
+     ]
+    ],
+    "look": [
+     0,
+     3.3,
+     -13
+    ],
+    "left": {
+     "label": "מנהרת השירות",
+     "next": [
+      0,
+      1.1,
+      -58,
+      90
+     ],
+     "zones": [
+      {
+       "id": "3-4א",
+       "name": "מנהרת השירות",
+       "seed": 34,
+       "par": 20,
+       "set": [
+        {
+         "kind": "tunnel",
+         "x": 0,
+         "z0": -10,
+         "z1": -70,
+         "w": 10,
+         "h": 6.5
+        }
+       ],
+       "props": [
+        [
+         "crate_k",
+         -3,
+         -30,
+         0
+        ],
+        [
+         "barrel",
+         3.2,
+         -34,
+         0
+        ],
+        [
+         "barrel",
+         3.8,
+         -34.6,
+         0
+        ],
+        [
+         "cone",
+         -1,
+         -24,
+         0
+        ],
+        [
+         "cone",
+         1,
+         -24,
+         0
+        ],
+        [
+         "red_barrel",
+         2.8,
+         -42,
+         0,
+         {
+          "destructible": "red_barrel"
+         }
+        ],
+        [
+         "pallet",
+         -3.4,
+         -46,
+         20
+        ],
+        [
+         "box_factory",
+         3,
+         -52,
+         0
+        ],
+        [
+         "neon",
+         0,
+         -69.4,
+         0,
+         {
+          "text": "יציאת חירום",
+          "y": 5.2,
+          "color": "#8cff3a",
+          "w": 5,
+          "h": 1
+         }
+        ]
+       ],
+       "path": [
+        [
+         0,
+         1.7,
+         1
+        ],
+        [
+         0,
+         1.7,
+         -14
+        ],
+        [
+         0,
+         1.7,
+         -22
+        ]
+       ],
+       "look": [
+        0,
+        1.6,
+        -40
+       ],
+       "next": [
+        0,
+        0,
+        -70,
+        0
+       ],
+       "waves": [
+        {
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "popup",
+            "model": "worker",
+            "outfit": "red",
+            "pos": [
+             -3,
+             0,
+             -32
+            ]
+           }
+          },
+          {
+           "t": 0.9,
+           "enemy": {
+            "kind": "roll",
+            "model": "punk",
+            "outfit": "yellow",
+            "from": [
+             4.2,
+             0,
+             -40
+            ],
+            "pos": [
+             0.6,
+             0,
+             -40
+            ]
+           }
+          },
+          {
+           "t": 0,
+           "civ": {
+            "kind": "panic",
+            "from": [
+             1,
+             0,
+             -28
+            ],
+            "to": [
+             -1,
+             0,
+             -64
+            ],
+            "model": "farmer"
+           }
+          }
+         ]
+        },
+        {
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "heavy",
+            "model": "swat",
+            "outfit": "armor",
+            "from": [
+             0,
+             0,
+             -68
+            ],
+            "pos": [
+             0,
+             0,
+             -52
+            ],
+            "hp": 3
+           }
+          },
+          {
+           "t": 0.8,
+           "grenade": {
+            "from": [
+             0,
+             2,
+             -60
+            ]
+           }
+          },
+          {
+           "t": 1.6,
+           "enemy": {
+            "kind": "popup",
+            "model": "casual",
+            "outfit": "purple",
+            "pos": [
+             3.4,
+             0,
+             -54.5
+            ]
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "id": "3-5א",
+       "name": "חצר התחזוקה",
+       "seed": 35,
+       "par": 20,
+       "set": [
+        {
+         "kind": "plaza",
+         "x": 0,
+         "z": -20,
+         "w": 34,
+         "d": 40,
+         "color": 9407108
+        },
+        {
+         "kind": "tracks",
+         "x": -6,
+         "z0": 0,
+         "z1": -40
+        },
+        {
+         "kind": "tracks",
+         "x": 6,
+         "z0": 0,
+         "z1": -40
+        }
+       ],
+       "props": [
+        [
+         "wagon",
+         -6,
+         -22,
+         0,
+         {
+          "tint": {
+           "colormap": 1402304
+          }
+         }
+        ],
+        [
+         "flatbed",
+         6,
+         -26,
+         0
+        ],
+        [
+         "cone",
+         0,
+         -14,
+         0
+        ],
+        [
+         "barrier",
+         0,
+         -30,
+         0
+        ],
+        [
+         "red_barrel",
+         1.8,
+         -22.5,
+         0,
+         {
+          "destructible": "red_barrel"
+         }
+        ],
+        [
+         "street_light",
+         -12,
+         -10,
+         90
+        ],
+        [
+         "street_light",
+         12,
+         -28,
+         -90
+        ],
+        [
+         "warehouse_c",
+         0,
+         -48,
+         0
+        ],
+        [
+         "pickup_crate",
+         9.4,
+         -16,
+         0,
+         {
+          "destructible": "crate",
+          "weapon": "shotgun"
+         }
+        ]
+       ],
+       "lights": true,
+       "path": [
+        [
+         0,
+         1.7,
+         -2
+        ],
+        [
+         0,
+         1.7,
+         -7
+        ]
+       ],
+       "look": [
+        0,
+        1.6,
+        -26
+       ],
+       "next": [
+        0,
+        0,
+        -40,
+        0
+       ],
+       "waves": [
+        {
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "jumpdown",
+            "model": "adventurer",
+            "outfit": "teal",
+            "from": [
+             -6,
+             4.2,
+             -24
+            ],
+            "pos": [
+             -2.6,
+             0,
+             -24
+            ]
+           }
+          },
+          {
+           "t": 0.9,
+           "enemy": {
+            "kind": "popup",
+            "model": "punkf",
+            "outfit": "red",
+            "pos": [
+             6,
+             1.6,
+             -29
+            ]
+           }
+          },
+          {
+           "t": 1.7,
+           "enemy": {
+            "kind": "driveby",
+            "model": "suit",
+            "outfit": "yellow",
+            "from": [
+             -16,
+             0,
+             -34
+            ],
+            "pos": [
+             16,
+             0,
+             -34
+            ],
+            "car": "car_sport2",
+            "carColor": 2171169,
+            "side": 1,
+            "speed": 9
+           }
+          }
+         ]
+        },
+        {
+         "look": [
+          0,
+          1.6,
+          -30
+         ],
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "runout",
+            "model": "worker",
+            "outfit": "orange",
+            "from": [
+             -10,
+             0,
+             -36
+            ],
+            "pos": [
+             -3,
+             0,
+             -31
+            ]
+           }
+          },
+          {
+           "t": 0.8,
+           "enemy": {
+            "kind": "runout",
+            "model": "casual",
+            "outfit": "purple",
+            "from": [
+             10,
+             0,
+             -36
+            ],
+            "pos": [
+             3,
+             0,
+             -31.5
+            ]
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    },
+    "right": {
+     "label": "גשר הולכי הרגל",
+     "next": [
+      0,
+      1.1,
+      -58,
+      -90
+     ],
+     "zones": [
+      {
+       "id": "3-4ב",
+       "name": "הקומה העליונה",
+       "seed": 36,
+       "par": 20,
+       "set": [
+        {
+         "kind": "hall",
+         "x": 0,
+         "z": -40,
+         "w": 22,
+         "d": 56,
+         "h": 8,
+         "floor": 15526112,
+         "wall": 14081506,
+         "back": false
+        }
+       ],
+       "props": [
+        [
+         "neon",
+         0,
+         -67.5,
+         0,
+         {
+          "text": "גשר הולכי הרגל",
+          "y": 6.4,
+          "color": "#2ee6ff",
+          "w": 9,
+          "h": 1.3
+         }
+        ],
+        [
+         "neon",
+         -10.7,
+         -34,
+         90,
+         {
+          "text": "פלאפל",
+          "y": 5,
+          "color": "#ffd400",
+          "w": 4,
+          "h": 1
+         }
+        ],
+        [
+         "vending",
+         -10,
+         -30,
+         90
+        ],
+        [
+         "vending",
+         -10,
+         -32.2,
+         90
+        ],
+        [
+         "bench_metal",
+         6,
+         -36,
+         -90
+        ],
+        [
+         "bench_metal",
+         6,
+         -40,
+         -90
+        ],
+        [
+         "glass",
+         0,
+         -46,
+         0,
+         {
+          "y": 1.4,
+          "w": 6,
+          "h": 2.6
+         }
+        ],
+        [
+         "red_barrel",
+         -3.4,
+         -51,
+         0,
+         {
+          "destructible": "red_barrel"
+         }
+        ],
+        [
+         "potted_plant",
+         9.5,
+         -24,
+         0
+        ],
+        [
+         "potted_plant",
+         -9.5,
+         -52,
+         0
+        ],
+        [
+         "escalator",
+         7,
+         -58,
+         180
+        ]
+       ],
+       "path": [
+        [
+         0,
+         1.7,
+         1
+        ],
+        [
+         0,
+         1.7,
+         -16
+        ],
+        [
+         0,
+         1.7,
+         -28
+        ]
+       ],
+       "look": [
+        0,
+        1.6,
+        -48
+       ],
+       "next": [
+        0,
+        0,
+        -68,
+        0
+       ],
+       "waves": [
+        {
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "popup",
+            "model": "punk",
+            "outfit": "purple",
+            "pos": [
+             -2,
+             0,
+             -49
+            ]
+           }
+          },
+          {
+           "t": 0.8,
+           "enemy": {
+            "kind": "window",
+            "model": "suit",
+            "outfit": "teal",
+            "pos": [
+             7,
+             0,
+             -58
+            ],
+            "from": [
+             9.5,
+             0,
+             -58
+            ]
+           }
+          },
+          {
+           "t": 0,
+           "civ": {
+            "kind": "panic",
+            "from": [
+             -3,
+             0,
+             -40
+            ],
+            "to": [
+             -8,
+             0,
+             -24
+            ],
+            "model": "woman"
+           }
+          }
+         ]
+        },
+        {
+         "look": [
+          0,
+          1.6,
+          -54
+         ],
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "knife",
+            "model": "punkf",
+            "outfit": "yellow",
+            "from": [
+             2,
+             0,
+             -66
+            ]
+           }
+          },
+          {
+           "t": 1,
+           "enemy": {
+            "kind": "popup",
+            "model": "casual",
+            "outfit": "red",
+            "pos": [
+             3.5,
+             0,
+             -50.5
+            ]
+           }
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "id": "3-5ב",
+       "name": "גשר הולכי הרגל",
+       "seed": 37,
+       "par": 18,
+       "set": [
+        {
+         "kind": "hall",
+         "x": 0,
+         "z": -20,
+         "w": 8,
+         "d": 40,
+         "h": 5,
+         "floor": 14736338,
+         "wall": 13161176,
+         "left": false,
+         "right": false,
+         "back": false
+        }
+       ],
+       "props": [
+        [
+         "glass",
+         -4,
+         -10,
+         90,
+         {
+          "y": 2.1,
+          "w": 6,
+          "h": 3.6
+         }
+        ],
+        [
+         "glass",
+         -4,
+         -18,
+         90,
+         {
+          "y": 2.1,
+          "w": 6,
+          "h": 3.6
+         }
+        ],
+        [
+         "glass",
+         -4,
+         -26,
+         90,
+         {
+          "y": 2.1,
+          "w": 6,
+          "h": 3.6
+         }
+        ],
+        [
+         "glass",
+         4,
+         -10,
+         90,
+         {
+          "y": 2.1,
+          "w": 6,
+          "h": 3.6
+         }
+        ],
+        [
+         "glass",
+         4,
+         -18,
+         90,
+         {
+          "y": 2.1,
+          "w": 6,
+          "h": 3.6
+         }
+        ],
+        [
+         "glass",
+         4,
+         -26,
+         90,
+         {
+          "y": 2.1,
+          "w": 6,
+          "h": 3.6
+         }
+        ],
+        [
+         "rail_guard",
+         -3.7,
+         -34,
+         90
+        ],
+        [
+         "rail_guard",
+         3.7,
+         -34,
+         90
+        ],
+        [
+         "bench_metal",
+         -2.5,
+         -30,
+         90
+        ],
+        [
+         "crate_k",
+         2.4,
+         -28,
+         0
+        ],
+        [
+         "neon",
+         0,
+         -39.6,
+         0,
+         {
+          "text": "לרציפים התחתונים",
+          "y": 4,
+          "color": "#ff3fb4",
+          "w": 7,
+          "h": 1
+         }
+        ]
+       ],
+       "path": [
+        [
+         0,
+         1.7,
+         -2
+        ],
+        [
+         0,
+         1.7,
+         -8
+        ]
+       ],
+       "look": [
+        0,
+        1.6,
+        -28
+       ],
+       "next": [
+        0,
+        0,
+        -40,
+        0
+       ],
+       "waves": [
+        {
+         "events": [
+          {
+           "t": 0.2,
+           "enemy": {
+            "kind": "popup",
+            "model": "worker",
+            "outfit": "yellow",
+            "pos": [
+             2.6,
+             0,
+             -29.6
+            ]
+           }
+          },
+          {
+           "t": 0.8,
+           "enemy": {
+            "kind": "runout",
+            "model": "adventurer",
+            "outfit": "orange",
+            "from": [
+             0,
+             0,
+             -40
+            ],
+            "pos": [
+             -1.2,
+             0,
+             -32
+            ]
+           }
+          },
+          {
+           "t": 1.6,
+           "enemy": {
+            "kind": "heavy",
+            "model": "swat",
+            "outfit": "armor",
+            "from": [
+             1,
+             0,
+             -40
+            ],
+            "pos": [
+             1.5,
+             0,
+             -35
+            ],
+            "hp": 3
+           }
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "3-6",
+   "name": "הרכבת הנוסעת",
+   "seed": 38,
+   "par": 30,
+   "set": [
+    {
+     "kind": "tunnel",
+     "x": 0,
+     "z0": 6,
+     "z1": -250,
+     "w": 14,
+     "h": 7.5
+    },
+    {
+     "kind": "tracks",
+     "x": -3,
+     "z0": 6,
+     "z1": -250
+    },
+    {
+     "kind": "tracks",
+     "x": 3,
+     "z0": 6,
+     "z1": -250
+    }
+   ],
+   "props": [],
+   "travel": {
+    "duration": 26,
+    "vehicle": {
+     "name": "flatbed",
+     "pos": [
+      0,
+      0,
+      2
+     ],
+     "rot": 0,
+     "tint": {
+      "colormap": 6975350
+     }
+    },
+    "sound": "train",
+    "props": [
+     [
+      "train_q",
+      6.2,
+      -2,
+      0,
+      {
+       "tint": {
+        "^Outside$": 14037034,
+        "^Top$": 15921906,
+        "^Windows$": 1779760,
+        "^Black$": 2039583
+       }
+      }
+     ],
+     [
+      "train_q",
+      6.2,
+      -24,
+      0,
+      {
+       "tint": {
+        "^Outside$": 14037034,
+        "^Top$": 15921906,
+        "^Windows$": 1779760,
+        "^Black$": 2039583
+       }
+      }
+     ]
+    ]
+   },
+   "path": [
+    [
+     -3,
+     3.3,
+     -4
+    ],
+    [
+     -3,
+     3.3,
+     -80
+    ],
+    [
+     -3,
+     3.3,
+     -160
+    ],
+    [
+     -3,
+     3.3,
+     -235
+    ]
+   ],
+   "look": [
+    -3,
+    3,
+    -250
+   ],
+   "next": [
+    -3,
+    0,
+    -248,
+    0
+   ],
+   "waves": [
+    {
+     "events": [
+      {
+       "t": 1,
+       "enemy": {
+        "kind": "popup",
+        "model": "punk",
+        "outfit": "yellow",
+        "rig": true,
+        "pos": [
+         6.2,
+         3.8,
+         -6
+        ],
+        "duck": true,
+        "delay": 0.4
+       }
+      },
+      {
+       "t": 2.2,
+       "enemy": {
+        "kind": "popup",
+        "model": "punkf",
+        "outfit": "teal",
+        "rig": true,
+        "pos": [
+         6.2,
+         3.8,
+         -16
+        ],
+        "duck": true,
+        "delay": 0.4
+       }
+      }
+     ]
+    },
+    {
+     "events": [
+      {
+       "t": 0.5,
+       "enemy": {
+        "kind": "jumpdown",
+        "model": "suit",
+        "outfit": "red",
+        "rig": true,
+        "from": [
+         6.2,
+         3.8,
+         -12
+        ],
+        "pos": [
+         1,
+         1.6,
+         -7
+        ]
+       }
+      },
+      {
+       "t": 1.8,
+       "enemy": {
+        "kind": "popup",
+        "model": "adventurer",
+        "outfit": "purple",
+        "rig": true,
+        "pos": [
+         6.2,
+         3.8,
+         -28
+        ],
+        "duck": true
+       }
+      },
+      {
+       "t": 2.6,
+       "grenade": {
+        "from": [
+         6,
+         4,
+         -160
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "events": [
+      {
+       "t": 0.4,
+       "enemy": {
+        "kind": "popup",
+        "model": "casual",
+        "outfit": "orange",
+        "rig": true,
+        "pos": [
+         6.4,
+         3.8,
+         -4
+        ],
+        "duck": true
+       }
+      },
+      {
+       "t": 1.6,
+       "enemy": {
+        "kind": "popup",
+        "model": "worker",
+        "outfit": "white",
+        "rig": true,
+        "pos": [
+         6,
+         3.8,
+         -20
+        ],
+        "duck": true
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3-7",
+   "name": "הרציף התת־קרקעי",
+   "seed": 39,
+   "par": 22,
+   "set": [
+    {
+     "kind": "hall",
+     "x": 3,
+     "z": -24,
+     "w": 24,
+     "d": 48,
+     "h": 9,
+     "floor": 14276303,
+     "wall": 12569039,
+     "back": true
+    },
+    {
+     "kind": "platform",
+     "x": 6,
+     "z": -24,
+     "w": 8,
+     "d": 44,
+     "edges": [
+      -1
+     ],
+     "roof": false
+    },
+    {
+     "kind": "tracks",
+     "x": 0,
+     "z0": 0,
+     "z1": -48
+    }
+   ],
+   "props": [
+    [
+     "neon",
+     6,
+     -47.5,
+     0,
+     {
+      "text": "הרציף התחתון",
+      "y": 6.6,
+      "color": "#ff3fb4",
+      "w": 8,
+      "h": 1.3
+     }
+    ],
+    [
+     "neon",
+     -8.6,
+     -24,
+     90,
+     {
+      "text": "שמור על הקו הצהוב",
+      "y": 5,
+      "color": "#ffd400",
+      "w": 6,
+      "h": 0.9
+     }
+    ],
+    [
+     "train_q",
+     0,
+     -30,
+     0,
+     {
+      "tint": {
+       "^Outside$": 14037034,
+       "^Top$": 15921906,
+       "^Windows$": 1779760,
+       "^Black$": 2039583
+      }
+     }
+    ],
+    [
+     "ticket",
+     9.4,
+     -18,
+     -90,
+     {
+      "y": 1.1
+     }
+    ],
+    [
+     "red_barrel",
+     4,
+     -32,
+     0,
+     {
+      "destructible": "red_barrel",
+      "y": 1.1
+     }
+    ],
+    [
+     "pickup_crate",
+     8.8,
+     -26,
+     0,
+     {
+      "destructible": "crate",
+      "weapon": "magnum",
+      "y": 1.1
+     }
+    ]
+   ],
+   "path": [
+    [
+     3,
+     1.7,
+     -2
+    ],
+    [
+     4.5,
+     2.8,
+     -8
+    ]
+   ],
+   "look": [
+    3,
+    1.8,
+    -30
+   ],
+   "next": [
+    0,
+    0,
+    -48,
+    0
+   ],
+   "waves": [
+    {
+     "events": [
+      {
+       "t": 0.3,
+       "enemy": {
+        "kind": "popup",
+        "model": "punk",
+        "outfit": "red",
+        "pos": [
+         4.2,
+         1.1,
+         -32.4
+        ]
+       }
+      },
+      {
+       "t": 1,
+       "enemy": {
+        "kind": "window",
+        "model": "suit",
+        "outfit": "yellow",
+        "pos": [
+         2.6,
+         1.1,
+         -26
+        ],
+        "from": [
+         0.6,
+         1.1,
+         -26
+        ]
+       }
+      },
+      {
+       "t": 0,
+       "civ": {
+        "kind": "freeze",
+        "pos": [
+         8,
+         1.1,
+         -14
+        ],
+        "to": [
+         8.5,
+         1.1,
+         -2
+        ],
+        "hold": 2.6,
+        "model": "woman"
+       }
+      }
+     ]
+    },
+    {
+     "look": [
+      3,
+      1.8,
+      -36
+     ],
+     "events": [
+      {
+       "t": 0.2,
+       "enemy": {
+        "kind": "heavy",
+        "model": "swat",
+        "outfit": "armor",
+        "from": [
+         6,
+         1.1,
+         -46
+        ],
+        "pos": [
+         6.4,
+         1.1,
+         -38
+        ],
+        "hp": 3
+       }
+      },
+      {
+       "t": 0.8,
+       "enemy": {
+        "kind": "runacross",
+        "model": "punkf",
+        "outfit": "purple",
+        "from": [
+         10,
+         1.1,
+         -36
+        ],
+        "pos": [
+         3.5,
+         1.1,
+         -36
+        ]
+       }
+      },
+      {
+       "t": 0.6,
+       "pickup": {
+        "type": "shield",
+        "pos": [
+         6,
+         2.6,
+         -16
+        ]
+       }
+      },
+      {
+       "t": 1.5,
+       "enemy": {
+        "kind": "grenade",
+        "model": "adventurer",
+        "outfit": "teal",
+        "pos": [
+         8,
+         1.1,
+         -42
+        ],
+        "throws": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "3-8",
+   "name": "הקרב האחרון",
+   "seed": 40,
+   "par": 70,
+   "set": [
+    {
+     "kind": "hall",
+     "x": 3,
+     "z": -40,
+     "w": 26,
+     "d": 90,
+     "h": 10,
+     "floor": 14276303,
+     "wall": 12569039
+    },
+    {
+     "kind": "platform",
+     "x": 7,
+     "z": -40,
+     "w": 9,
+     "d": 84,
+     "edges": [
+      -1
+     ],
+     "roof": false
+    },
+    {
+     "kind": "tracks",
+     "x": 0,
+     "z0": 4,
+     "z1": -84
+    }
+   ],
+   "props": [
+    [
+     "neon",
+     7,
+     -84.5,
+     0,
+     {
+      "text": "סוף הקו",
+      "y": 7.4,
+      "color": "#ff3b2f",
+      "w": 6,
+      "h": 1.3
+     }
+    ],
+    [
+     "bench_metal",
+     9,
+     -54,
+     -90,
+     {
+      "y": 1.1
+     }
+    ],
+    [
+     "ticket",
+     10.4,
+     -60,
+     -90,
+     {
+      "y": 1.1
+     }
+    ],
+    [
+     "crate_k",
+     5,
+     -58,
+     0,
+     {
+      "y": 1.1
+     }
+    ],
+    [
+     "crate_k",
+     8.6,
+     -66,
+     90,
+     {
+      "y": 1.1
+     }
+    ],
+    [
+     "red_barrel",
+     6,
+     -62,
+     0,
+     {
+      "destructible": "red_barrel",
+      "y": 1.1
+     }
+    ]
+   ],
+   "travel": {
+    "duration": 22,
+    "endEarly": false,
+    "props": [
+     [
+      "train_q",
+      -6.5,
+      -10,
+      0,
+      {
+       "tint": {
+        "^Outside$": 14037034,
+        "^Top$": 15921906,
+        "^Windows$": 1779760,
+        "^Black$": 2039583
+       }
+      }
+     ],
+     [
+      "train_q",
+      -6.5,
+      -30.5,
+      0,
+      {
+       "tint": {
+        "^Outside$": 14037034,
+        "^Top$": 15921906,
+        "^Windows$": 1779760,
+        "^Black$": 2039583
+       }
+      }
+     ]
+    ]
+   },
+   "path": [
+    [
+     6.5,
+     2.8,
+     -2
+    ],
+    [
+     6.5,
+     2.8,
+     -20
+    ],
+    [
+     6.5,
+     2.8,
+     -42
+    ]
+   ],
+   "look": [
+    3,
+    3,
+    -66
+   ],
+   "boss": {
+    "name": "ה\"מנצח\" — ראש הרשת",
+    "title": "ראש הרשת",
+    "model": "punk",
+    "outfit": "boss3",
+    "weapon": "smg",
+    "hp": 60,
+    "rig": true,
+    "start": [
+     -6.5,
+     3.8,
+     -14
+    ],
+    "covers": [
+     [
+      -7.1,
+      3.8,
+      -12
+     ],
+     [
+      -5.9,
+      3.8,
+      -18
+     ],
+     [
+      -6.5,
+      3.8,
+      -26
+     ],
+     [
+      -7,
+      3.8,
+      -33
+     ]
+    ],
+    "patterns": [
+     "burst",
+     "grenade",
+     "roll",
+     "burst"
+    ],
+    "phase2": {
+     "rig": false,
+     "covers": [
+      [
+       5,
+       1.1,
+       -60
+      ],
+      [
+       8.4,
+       1.1,
+       -64
+      ],
+      [
+       6.2,
+       1.1,
+       -70
+      ],
+      [
+       9.4,
+       1.1,
+       -58
+      ]
+     ],
+     "patterns": [
+      "roll",
+      "burst",
+      "grenade",
+      "summon"
+     ],
+     "callout": "הוא קפץ לרציף!"
+    },
+    "summon": [
+     {
+      "kind": "popup",
+      "pos": [
+       5.4,
+       1.1,
+       -59
+      ],
+      "model": "punkf",
+      "outfit": "yellow"
+     },
+     {
+      "kind": "runout",
+      "from": [
+       12,
+       1.1,
+       -66
+      ],
+      "pos": [
+       8.5,
+       1.1,
+       -63
+      ],
+      "model": "casual",
+      "outfit": "red"
+     }
+    ]
+   },
+   "waves": []
+  }
+ ]
+}

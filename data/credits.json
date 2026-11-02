@@ -1,0 +1,541 @@
+[
+ {
+  "name": "Ultimate Modular Men / Women (Casual, Punk, Punk female, SWAT, Worker, Business Man, Beach, Adventurer, Farmer)",
+  "author": "Quaternius",
+  "source": "https://quaternius.com/packs/ultimatemodularcharacters.html (mirror: https://poly.pizza/u/Quaternius)",
+  "license": "CC0 1.0",
+  "usage": "אויבים, אזרחים ובוסים"
+ },
+ {
+  "name": "Animated Woman",
+  "author": "Quaternius",
+  "source": "https://poly.pizza/m/nIItLV9nxS",
+  "license": "CC0 1.0",
+  "usage": "אזרחית"
+ },
+ {
+  "name": "Universal Animation Library",
+  "author": "Quaternius",
+  "source": "https://quaternius.itch.io/universal-animation-library",
+  "license": "CC0 1.0",
+  "usage": "אנימציות (כריעה, נפילות, גלגול, זריקה, ריצה)"
+ },
+ {
+  "name": "Universal Animation Library 2",
+  "author": "Quaternius",
+  "source": "https://quaternius.itch.io/universal-animation-library-2",
+  "license": "CC0 1.0",
+  "usage": "אנימציות (נחיתה, זריקה, טלפון)"
+ },
+ {
+  "name": "Downtown City MegaKit (Standard)",
+  "author": "Quaternius",
+  "source": "https://quaternius.itch.io/downtown-city-megakit",
+  "license": "CC0 1.0",
+  "usage": "בניינים, מזגנים, עציצים"
+ },
+ {
+  "name": "Realistic Car Pack",
+  "author": "Quaternius",
+  "source": "https://quaternius.itch.io/lowpoly-cars",
+  "license": "CC0 1.0",
+  "usage": "מכוניות, ניידת משטרה"
+ },
+ {
+  "name": "LowPoly Public Transport",
+  "author": "Quaternius",
+  "source": "https://opengameart.org/content/lowpoly-public-transport",
+  "license": "CC0 1.0",
+  "usage": "אוטובוס, רמזור, רכבת"
+ },
+ {
+  "name": "Ultimate Gun Pack",
+  "author": "Quaternius",
+  "source": "https://quaternius.itch.io/50-lowpoly-guns",
+  "license": "CC0 1.0",
+  "usage": "אקדחים, תת־מקלע, רובה ציד, מגנום"
+ },
+ {
+  "name": "Bench, Exploding Barrel, Trashcan, Trash Bags, Trash Container, Water Bottle, Pickup Crate, Cube Crate, Container, Street Light",
+  "author": "Quaternius",
+  "source": "https://poly.pizza/u/Quaternius",
+  "license": "CC0 1.0",
+  "usage": "ספסלים, חביות נפץ, פחים, ארגזים, פנסי רחוב"
+ },
+ {
+  "name": "Car Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/car-kit",
+  "license": "CC0 1.0",
+  "usage": "טנדר, משאית חלוקה, משאית, מעמיס, קונוסים"
+ },
+ {
+  "name": "City Kit (Roads)",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/city-kit-roads",
+  "license": "CC0 1.0",
+  "usage": "רמזורים, פנסים, מכולת אשפה, תמרורים"
+ },
+ {
+  "name": "City Kit (Commercial)",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/city-kit-commercial",
+  "license": "CC0 1.0",
+  "usage": "סוככים, שמשיות"
+ },
+ {
+  "name": "City Kit (Suburban)",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/city-kit-suburban",
+  "license": "CC0 1.0",
+  "usage": "גדרות, עצים"
+ },
+ {
+  "name": "City Kit (Industrial)",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/city-kit-industrial",
+  "license": "CC0 1.0",
+  "usage": "מכולות, מחסנים, דודי שמש, מיכלים"
+ },
+ {
+  "name": "Retro Urban Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/retro-urban-kit",
+  "license": "CC0 1.0",
+  "usage": "מרפסות, פיגומים, מחסומים, משטחים"
+ },
+ {
+  "name": "Mini Market",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/mini-market",
+  "license": "CC0 1.0",
+  "usage": "דוכני שוק"
+ },
+ {
+  "name": "Nature Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/nature-kit",
+  "license": "CC0 1.0",
+  "usage": "עצי דקל, עצים, שיחים"
+ },
+ {
+  "name": "Survival Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/survival-kit",
+  "license": "CC0 1.0",
+  "usage": "חביות, ארגזים, בקבוקים, דליים"
+ },
+ {
+  "name": "Furniture Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/furniture-kit",
+  "license": "CC0 1.0",
+  "usage": "עציצים, פחי אשפה קטנים"
+ },
+ {
+  "name": "Blaster Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/blaster-kit",
+  "license": "CC0 1.0",
+  "usage": "ארגזי ציוד"
+ },
+ {
+  "name": "Factory Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/factory-kit",
+  "license": "CC0 1.0",
+  "usage": "עגורן, קורות פלדה, מסלולי הליכה"
+ },
+ {
+  "name": "Watercraft Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/watercraft-kit",
+  "license": "CC0 1.0",
+  "usage": "אוניות משא, גוררת, מצופים"
+ },
+ {
+  "name": "Train Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/train-kit",
+  "license": "CC0 1.0",
+  "usage": "רכבת קלה, חשמלית"
+ },
+ {
+  "name": "Space Station Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/space-station-kit",
+  "license": "CC0 1.0",
+  "usage": "מכונות כרטיסים, מעקות, ספסלי מתכת"
+ },
+ {
+  "name": "Building Kit",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/building-kit",
+  "license": "CC0 1.0",
+  "usage": "מדרגות (מדרגות נעות)"
+ },
+ {
+  "name": "3D Vehicles Pack (truck_02)",
+  "author": "mehrasaur",
+  "source": "https://opengameart.org/content/3d-vehicles-pack",
+  "license": "CC0 1.0",
+  "usage": "משאית ארגז"
+ },
+ {
+  "name": "3D Low Poly Knife",
+  "author": "alexanderzotov",
+  "source": "https://opengameart.org/content/3d-low-poly-knife",
+  "license": "CC0 1.0",
+  "usage": "סכין"
+ },
+ {
+  "name": "Mk2 Grenade",
+  "author": "lonesomeducky",
+  "source": "https://opengameart.org/content/mk2-grenade",
+  "license": "CC0 1.0",
+  "usage": "רימון"
+ },
+ {
+  "name": "Vending Machines (Low Poly Style)",
+  "author": "tiko479",
+  "source": "https://opengameart.org/content/vending-machines-low-poly-style",
+  "license": "CC0 1.0",
+  "usage": "מכונות שתייה"
+ },
+ {
+  "name": "Asphalt 02, Concrete Pavers 02, Large Sandstone Blocks, Plastered Wall 02, Concrete Wall 008, Brick Wall 02, Corrugated Iron 02, Brown Planks 05, Metal Plate, Floor Tiles 08, Rectangular Facade Tiles, Painted Metal Shutter",
+  "author": "Poly Haven (Rob Tuytel, Dimitrios Savva, Amal Kumar ועוד)",
+  "source": "https://polyhaven.com/textures",
+  "license": "CC0 1.0",
+  "usage": "משטחי PBR: כביש, מדרכות, אבן ירושלמית, טיח, בטון, לבנים, פח גלי, עץ, סיפון, אריחים, תריסים (במהדורת ה־PC: 4K לכביש, לחזיתות, לסיפון ולרצפת התחנה; 2K לשאר; כולל מפות גובה)"
+ },
+ {
+  "name": "Kloofendal 43d Clear (Pure Sky)",
+  "author": "Greg Zaal / Poly Haven",
+  "source": "https://polyhaven.com/a/kloofendal_43d_clear_puresky",
+  "license": "CC0 1.0",
+  "usage": "שמיים — אחר הצהריים (4K)"
+ },
+ {
+  "name": "Qwantani Sunset (Pure Sky)",
+  "author": "Greg Zaal / Poly Haven",
+  "source": "https://polyhaven.com/a/qwantani_sunset_puresky",
+  "license": "CC0 1.0",
+  "usage": "שמיים — שקיעה (4K)"
+ },
+ {
+  "name": "Rooftop Night",
+  "author": "Greg Zaal / Poly Haven",
+  "source": "https://polyhaven.com/a/rooftop_night",
+  "license": "CC0 1.0",
+  "usage": "שמיים — לילה עירוני (4K)"
+ },
+ {
+  "name": "The Free Firearm Sound Library (Walther PPQ, PPSh, Mossberg, Ruger Single Six, Bersa, AK-47)",
+  "author": "bart / Still North Media",
+  "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+  "license": "CC0 1.0",
+  "usage": "יריות"
+ },
+ {
+  "name": "Gun reload sounds",
+  "author": "SpringySpringo",
+  "source": "https://opengameart.org/content/gun-reload-sounds",
+  "license": "CC0 1.0",
+  "usage": "טעינה"
+ },
+ {
+  "name": "100 CC0 SFX",
+  "author": "rubberduck",
+  "source": "https://opengameart.org/content/100-cc0-sfx",
+  "license": "CC0 1.0",
+  "usage": "נקישת הדק ריק, פיצוץ"
+ },
+ {
+  "name": "75 CC0 breaking / falling / hit sfx",
+  "author": "rubberduck",
+  "source": "https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx",
+  "license": "CC0 1.0",
+  "usage": "שבירת זכוכית"
+ },
+ {
+  "name": "Glass Break",
+  "author": "TinyWorlds",
+  "source": "https://opengameart.org/content/glass-break",
+  "license": "CC0 1.0",
+  "usage": "ניפוץ חלון ראווה"
+ },
+ {
+  "name": "Impact Sounds, Interface Sounds, Sci-Fi Sounds, Music Jingles",
+  "author": "Kenney",
+  "source": "https://kenney.nl/assets/category:Audio",
+  "license": "CC0 1.0",
+  "usage": "פגיעות במתכת ועץ, ריקושט, צלילי ממשק, ג׳ינגלים"
+ },
+ {
+  "name": "15 vocal male strain/hurt/pain/jump sounds",
+  "author": "qubodup",
+  "source": "https://opengameart.org/content/15-vocal-male-strainhurtpainjump-sounds",
+  "license": "CC0 1.0",
+  "usage": "פגיעה בשחקן"
+ },
+ {
+  "name": "Female Scream 1, Female Hurt Grunts & Groans",
+  "author": "nocturnalvanguard",
+  "source": "https://opengameart.org/content/female-scream-1",
+  "license": "CC0 1.0",
+  "usage": "צעקות אזרחים (ללא מילים)"
+ },
+ {
+  "name": "Sirens and Alarm Noise",
+  "author": "AQuinn",
+  "source": "https://opengameart.org/content/sirens-and-alarm-noise",
+  "license": "CC0 1.0",
+  "usage": "סירנה"
+ },
+ {
+  "name": "Car Sound Effects Pack",
+  "author": "ggbotnet",
+  "source": "https://opengameart.org/content/car-sound-effects-pack-low-quality",
+  "license": "CC0 1.0",
+  "usage": "מנוע"
+ },
+ {
+  "name": "SuperTuxKart sound effects",
+  "author": "scribe",
+  "source": "https://opengameart.org/content/supertuxkart-sound-effects",
+  "license": "CC0 1.0",
+  "usage": "חריקת צמיגים"
+ },
+ {
+  "name": "Racing car engine sound loops",
+  "author": "domasx2",
+  "source": "https://opengameart.org/content/racing-car-engine-sound-loops",
+  "license": "CC0 1.0",
+  "usage": "רעש רכבת"
+ },
+ {
+  "name": "Menu Music (\"awesomeness\")",
+  "author": "mrpoly",
+  "source": "https://opengameart.org/content/menu-music",
+  "license": "CC0 1.0",
+  "usage": "מוזיקת תפריט"
+ },
+ {
+  "name": "Action Track",
+  "author": "lushogames",
+  "source": "https://opengameart.org/content/action-track",
+  "license": "CC0 1.0",
+  "usage": "מוזיקה — שלב 1"
+ },
+ {
+  "name": "The Rush",
+  "author": "tebruno99",
+  "source": "https://opengameart.org/content/the-rush",
+  "license": "CC0 1.0",
+  "usage": "מוזיקה — שלב 2"
+ },
+ {
+  "name": "Night Prowler",
+  "author": "Section 31",
+  "source": "https://opengameart.org/content/night-prowler",
+  "license": "CC0 1.0",
+  "usage": "מוזיקה — שלב 3"
+ },
+ {
+  "name": "Epic Boss Battle (Seamlessly Looping)",
+  "author": "Juhani Junkala (SubspaceAudio)",
+  "source": "https://opengameart.org/content/boss-battle-music",
+  "license": "CC0 1.0",
+  "usage": "מוזיקת בוס"
+ },
+ {
+  "name": "Winning the Race",
+  "author": "Section 31",
+  "source": "https://opengameart.org/content/winning-the-race",
+  "license": "CC0 1.0",
+  "usage": "מוזיקת תוצאות"
+ },
+ {
+  "name": "Poly Haven model: barrel_03",
+  "author": "Serhii Khromov / Poly Haven",
+  "source": "https://polyhaven.com/a/barrel_03",
+  "license": "CC0 1.0",
+  "usage": "חביות"
+ },
+ {
+  "name": "Poly Haven model: wooden_crate_01",
+  "author": "James Ray Cock / Poly Haven",
+  "source": "https://polyhaven.com/a/wooden_crate_01",
+  "license": "CC0 1.0",
+  "usage": "ארגזי עץ"
+ },
+ {
+  "name": "Poly Haven model: metal_trash_can",
+  "author": "GurJas Studios / Poly Haven",
+  "source": "https://polyhaven.com/a/metal_trash_can",
+  "license": "CC0 1.0",
+  "usage": "פחי אשפה"
+ },
+ {
+  "name": "Poly Haven model: painted_wooden_bench",
+  "author": "Kirill Sannikov / Poly Haven",
+  "source": "https://polyhaven.com/a/painted_wooden_bench",
+  "license": "CC0 1.0",
+  "usage": "ספסלי רחוב"
+ },
+ {
+  "name": "Poly Haven model: street_lamp_01",
+  "author": "Josh Dean / Poly Haven",
+  "source": "https://polyhaven.com/a/street_lamp_01",
+  "license": "CC0 1.0",
+  "usage": "פנס רחוב"
+ },
+ {
+  "name": "Poly Haven model: street_lamp_02",
+  "author": "Josh Dean / Poly Haven",
+  "source": "https://polyhaven.com/a/street_lamp_02",
+  "license": "CC0 1.0",
+  "usage": "פנס רחוב"
+ },
+ {
+  "name": "Poly Haven model: potted_plant_01",
+  "author": "Rico Cilliers / Poly Haven",
+  "source": "https://polyhaven.com/a/potted_plant_01",
+  "license": "CC0 1.0",
+  "usage": "עציצים"
+ },
+ {
+  "name": "Poly Haven model: potted_plant_02",
+  "author": "Rico Cilliers / Poly Haven",
+  "source": "https://polyhaven.com/a/potted_plant_02",
+  "license": "CC0 1.0",
+  "usage": "עציצים"
+ },
+ {
+  "name": "Poly Haven model: planter_box_01",
+  "author": "James Ray Cock / Poly Haven",
+  "source": "https://polyhaven.com/a/planter_box_01",
+  "license": "CC0 1.0",
+  "usage": "אדניות"
+ },
+ {
+  "name": "Poly Haven model: fire_hydrant",
+  "author": "Gonçalo Felício / Poly Haven",
+  "source": "https://polyhaven.com/a/fire_hydrant",
+  "license": "CC0 1.0",
+  "usage": "ברזי כיבוי אש"
+ },
+ {
+  "name": "Poly Haven model: water_manhole_cover",
+  "author": "Raunox / Poly Haven",
+  "source": "https://polyhaven.com/a/water_manhole_cover",
+  "license": "CC0 1.0",
+  "usage": "מכסי ביוב"
+ },
+ {
+  "name": "Poly Haven model: trashbag",
+  "author": "Benny Weimer / Poly Haven",
+  "source": "https://polyhaven.com/a/trashbag",
+  "license": "CC0 1.0",
+  "usage": "שקיות אשפה"
+ },
+ {
+  "name": "Poly Haven model: cardboard_box_01",
+  "author": "Rahul Chaudhary / Poly Haven",
+  "source": "https://polyhaven.com/a/cardboard_box_01",
+  "license": "CC0 1.0",
+  "usage": "קרטונים"
+ },
+ {
+  "name": "Poly Haven model: steel_frame_shelves_01",
+  "author": "James Ray Cock / Poly Haven",
+  "source": "https://polyhaven.com/a/steel_frame_shelves_01",
+  "license": "CC0 1.0",
+  "usage": "מדפים"
+ },
+ {
+  "name": "Poly Haven model: utility_box_01",
+  "author": "James Ray Cock / Poly Haven",
+  "source": "https://polyhaven.com/a/utility_box_01",
+  "license": "CC0 1.0",
+  "usage": "ארונות חשמל ברחוב"
+ },
+ {
+  "name": "Poly Haven model: plastic_monobloc_chair_01",
+  "author": "Kuutti Siitonen / Poly Haven",
+  "source": "https://polyhaven.com/a/plastic_monobloc_chair_01",
+  "license": "CC0 1.0",
+  "usage": "כיסאות פלסטיק בשוק"
+ },
+ {
+  "name": "Poly Haven model: wooden_picnic_table",
+  "author": "Ulan Cabanilla / Poly Haven",
+  "source": "https://polyhaven.com/a/wooden_picnic_table",
+  "license": "CC0 1.0",
+  "usage": "שולחן"
+ },
+ {
+  "name": "Poly Haven model: rollershutter_door",
+  "author": "MP / Poly Haven",
+  "source": "https://polyhaven.com/a/rollershutter_door",
+  "license": "CC0 1.0",
+  "usage": "תריסי גלילה בחנויות סגורות"
+ },
+ {
+  "name": "Poly Haven model: security_camera_01",
+  "author": "Alexander Otterbeck, Yann Kervran / Poly Haven",
+  "source": "https://polyhaven.com/a/security_camera_01",
+  "license": "CC0 1.0",
+  "usage": "מצלמות אבטחה בתחנה"
+ },
+ {
+  "name": "Poly Haven model: propane_tank",
+  "author": "Slinc / Poly Haven",
+  "source": "https://polyhaven.com/a/propane_tank",
+  "license": "CC0 1.0",
+  "usage": "מכלי גז בנמל"
+ },
+ {
+  "name": "Poly Haven model: plastic_crate_01",
+  "author": "PierreB3D / Poly Haven",
+  "source": "https://polyhaven.com/a/plastic_crate_01",
+  "license": "CC0 1.0",
+  "usage": "ארגזי פלסטיק בשוק"
+ },
+ {
+  "name": "Poly Haven model: metal_jerrycan",
+  "author": "Sean Buckley / Poly Haven",
+  "source": "https://polyhaven.com/a/metal_jerrycan",
+  "license": "CC0 1.0",
+  "usage": "ג׳ריקנים"
+ },
+ {
+  "name": "Poly Haven model: wine_barrel_01",
+  "author": "James Ray Cock / Poly Haven",
+  "source": "https://polyhaven.com/a/wine_barrel_01",
+  "license": "CC0 1.0",
+  "usage": "חביות עץ"
+ },
+ {
+  "name": "Poly Haven model: wooden_military_crate",
+  "author": "Prabhjinder Singh / Poly Haven",
+  "source": "https://polyhaven.com/a/wooden_military_crate",
+  "license": "CC0 1.0",
+  "usage": "ארגזי נשק"
+ },
+ {
+  "name": "Secular One (TTF)",
+  "author": "Michal Sahar / The Secular One Project Authors",
+  "source": "https://github.com/google/fonts/tree/main/ofl/secularone",
+  "license": "OFL 1.1 (גופן)",
+  "usage": "כותרות ושלטים"
+ },
+ {
+  "name": "Rubik (TTF)",
+  "author": "Hubert & Fischer, Meir Sadan, Cyreal",
+  "source": "https://github.com/google/fonts/tree/main/ofl/rubik",
+  "license": "OFL 1.1 (גופן)",
+  "usage": "טקסט ממשק"
+ }
+]
