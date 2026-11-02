@@ -42,7 +42,13 @@ mkdir -p ~/Games/MishmeretLayla && tar -xzf MishmeretLayla-linux.tar.gz -C ~/Gam
 ~/Games/MishmeretLayla/MishmeretLayla.x86_64 --benchmark
 ```
 
-המשחק עובר אוטומטית על כל הזונות של כל השלבים בפריסט "גבוה", כותב את הקובץ `benchmark.txt` ליד קובץ ההפעלה, ויוצא.
+הפעלה עם שמירת יומן (למשל כדי לדווח על זמן הטעינה — השורה `LOAD_TIME_MS=`):
+
+```bash
+~/Games/MishmeretLayla/MishmeretLayla.x86_64 --verbose > ~/ml.log 2>&1
+```
+
+בבדיקת הביצועים המשחק עובר אוטומטית על כל הזונות של כל השלבים בפריסט "גבוה", כותב את הקובץ `benchmark.txt` ליד קובץ ההפעלה, ויוצא.
 
 ## בנייה מקוד המקור
 
