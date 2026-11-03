@@ -54,6 +54,9 @@ func _ready() -> void:
 		bench = {"kind": "shots", "results": []}
 	elif args.has("--loadshots"):
 		bench = {"kind": "loadshots", "results": []}
+		# software rendering in CI: small window (the captures render at 1280x720 off-screen)
+		if DisplayServer.get_name() != "headless":
+			get_window().size = Vector2i(640, 360)
 	elif args.has("--flowtest"):
 		bench = {"kind": "flow", "results": []}
 	get_tree().set_auto_accept_quit(false)
@@ -255,6 +258,8 @@ func _build_stage(index: int) -> void:
 		job_progress = 0.5 + 0.3 * float(i + 1) / defs.size(); job_status = "בונה את השלב"
 		await get_tree().process_frame
 	print("[load] zones built ", defs.size())
+	if bench.get("kind", "") == "loadshots":
+		return # CI shots: no shader warm-up needed (software rendering, stills only)
 	await warm_up(index, func(f): job_progress = 0.8 + 0.2 * f; job_status = "מכין אפקטים")
 	print("[load] warm-up done")
 
@@ -780,7 +785,7 @@ func _bench_tick() -> void:
 func _loadshot_tick() -> void:
 	var p: Dictionary = bench["plan"][bench["step"]]
 	if game.state == "intro": game.rail.time = game.rail.duration
-	var need := 3.5 if p["key"] == "boss" else 1.6
+	var need := 3.0 if p["key"] == "boss" else 1.0
 	if game.encounter == null or float(game.encounter["wave_time"]) < need: return
 	bench["running"] = false
 	var img := await _capture_image()

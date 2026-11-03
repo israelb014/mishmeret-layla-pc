@@ -47,11 +47,11 @@ detect_3d/compress_to=0
 # images that have no .import yet (e.g. the shared prop textures) get one before Godot sees them,
 # otherwise Godot would create them with its lossless + detect_3d defaults
 created = 0
-for root, dirs, files in os.walk('assets'):
+for root, dirs, files in [('.', [], ['icon.png'])] + list(os.walk('assets')):
     for f in files:
         if f.lower().endswith(('.jpg', '.jpeg', '.png')) and not os.path.exists(os.path.join(root, f) + '.import'):
             src = os.path.join(root, f)
-            open(src + '.import', 'w').write(STUB % src.replace(os.sep, '/'))
+            open(src + '.import', 'w').write(STUB % os.path.normpath(src).replace(os.sep, '/'))
             created += 1
 print('new .import files:', created)
 
