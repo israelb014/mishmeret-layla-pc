@@ -45,7 +45,9 @@ static func f(d: Dictionary, k: String, dv: float) -> float:
 	return float(d[k]) if d.has(k) and d[k] != null else dv
 
 static func _in(z: Zone, parent: Node3D, nm: String, x: float, zz: float, rot: float, o: Dictionary = {}) -> Node3D:
-	var obj := z.place(nm, x, zz, rot, o)
+	var oo := o.duplicate()
+	oo["_grouped"] = true # coordinates are local to the group: never merged with other placements
+	var obj := z.place(nm, x, zz, rot, oo)
 	if parent != null:
 		obj.reparent(parent, false)
 	return obj
@@ -428,7 +430,7 @@ static func set_gantry(z: Zone, p: Dictionary) -> void:
 			_in(z, g, "struct_tall", sx, sz, 0)
 	for sz in [-4.0, 4.0]:
 		var beam := _in(z, g, "struct_high", 0, sz, 90, {"rz": 90})
-		beam.position.y = 30
+		beam.position.y = 30.0 + (0.004 if sz > 0.0 else 0.0) # the two lying beams overlap: keep their faces apart
 		beam.scale = Vector3(1, (span + 2.0) / 22.0, 1)
 	_in(z, g, "crane_k", 0, 0, 0, {"y": 18})
 

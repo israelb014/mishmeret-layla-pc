@@ -420,14 +420,14 @@ func setup_rig(z: Zone) -> void:
 		z.set_meta("siren", [red, blue])
 	elif veh is Dictionary:
 		var v := prefabs.make(String(veh["name"]), U.tint(veh.get("tint")))
-		v.position = U.v3(veh.get("pos", [0, 0, 0]))
+		v.position = U.v3(veh.get("pos", [0, 0, 0])) + Vector3(0, 0.003, 0) # never coplanar with the floor
 		v.rotation.y = float(veh.get("rot", 0))
 		z.rig.add_child(v)
 	var anims := []
 	for p in t.get("props", []):
 		var o: Dictionary = p[4] if p.size() > 4 else {}
 		var obj := prefabs.make(String(p[0]), U.tint(o.get("tint")))
-		obj.position = Vector3(float(p[1]), float(o.get("y", 0)), float(p[2]))
+		obj.position = Vector3(float(p[1]), float(o.get("y", 0)) + 0.003, float(p[2]))
 		obj.rotation_degrees.y = float(p[3])
 		z.rig.add_child(obj)
 		if o.has("anim"): anims.append({"obj": obj, "base": obj.position.x, "sway": float(o["anim"].get("sway", 1)), "amp": float(o["anim"].get("amp", 0.6)), "t": 0.0})

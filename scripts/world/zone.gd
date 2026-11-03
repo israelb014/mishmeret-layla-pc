@@ -65,16 +65,41 @@ func build() -> void:
 var geo_seq := 0
 func _geo_eps() -> float:
 	geo_seq += 1
-	return 0.0008 * float(geo_seq % 12)
+	return 0.001 + 0.0006 * float(geo_seq % 8)
+
+## Slabs and walls: the smallest inset (from 0.6 mm up) whose six faces are all > 0.5 mm away
+## from the same-facing faces of every slab/wall already built that it touches.
+var boxes: Array = [] # zone-space AABBs of built slabs/walls
+func _box_eps(parent: Node3D, center: Vector3, size: Vector3, shrink: Vector3, lower: float) -> float:
+	var xf := Prefabs._rel_xf(self, parent) if parent != null and parent != self else Transform3D.IDENTITY
+	for k in range(1, 40):
+		var e := 0.0006 * k
+		var sz := size - shrink * 2.0 * e
+		var c := center - Vector3(0, lower * e, 0)
+		var box: AABB = xf * AABB(c - sz / 2.0, sz)
+		var ok := true
+		for old in boxes:
+			var ob: AABB = old
+			if not ob.grow(0.01).intersects(box): continue
+			for ax in 3:
+				if absf(ob.position[ax] - box.position[ax]) < 0.0005 or absf(ob.end[ax] - box.end[ax]) < 0.0005:
+					ok = false
+					break
+			if not ok: break
+		if ok:
+			boxes.append(box)
+			return e
+	return 0.0006 * 40
 
 var placed := {} # identical placements (same prefab, spot and angle) are made only once
 
 func place(nm: String, x: float, zz: float, rot_deg: float, o: Dictionary = {}) -> Node3D:
 	var key := "%s|%d|%d|%d|%d" % [nm, roundi(x * 100.0), roundi(zz * 100.0), roundi(float(o.get("y", 0.0)) * 100.0), roundi(rot_deg)]
-	if placed.has(key) and is_instance_valid(placed[key]):
+	var grouped := bool(o.get("_grouped", false))
+	if not grouped and placed.has(key) and is_instance_valid(placed[key]):
 		return placed[key]
 	var obj := prefabs.make(nm, U.tint(o.get("tint")))
-	placed[key] = obj
+	if not grouped: placed[key] = obj
 	obj.position = Vector3(x, float(o.get("y", 0.0)) + 0.001 + _geo_eps(), zz)
 	obj.rotation_degrees = Vector3(float(o.get("rx", 0.0)), rot_deg, float(o.get("rz", 0.0)))
 	if o.has("scale"):
@@ -137,7 +162,7 @@ func _set_shadow(n: Node, on: bool) -> void:
 func slab(mat: Material, w: float, d: float, x: float, y: float, zz: float, h := 0.02, parent: Node3D = null) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	var e := _geo_eps()
+	var e := _box_eps(parent if parent else static_root, Vector3(x, y - h / 2.0, zz), Vector3(w, h, d), Vector3(1, 0, 1), 1.0)
 	bm.size = Vector3(maxf(0.01, w - 2.0 * e), h, maxf(0.01, d - 2.0 * e))
 	mi.mesh = bm
 	mi.material_override = mat
@@ -150,7 +175,12 @@ func slab(mat: Material, w: float, d: float, x: float, y: float, zz: float, h :=
 func wall(mat: Material, w: float, h: float, x: float, y: float, zz: float, rot := 0.0, thick := 0.3, parent: Node3D = null) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	var e := _geo_eps()
+	# axis-aligned walls (0/90/180/270 degrees) get a guaranteed inset; others the generic one
+	var q := rot / (PI / 2.0)
+	var aligned := absf(q - roundf(q)) < 0.001
+	var swap := aligned and posmod(roundi(q), 2) == 1
+	var wsize := Vector3(thick, h, w) if swap else Vector3(w, h, thick)
+	var e := _box_eps(parent if parent else static_root, Vector3(x, y + h / 2.0, zz), wsize, Vector3(1, 0.5, 1), 0.5) if aligned else _geo_eps()
 	bm.size = Vector3(maxf(0.01, w - 2.0 * e), maxf(0.01, h - e), maxf(0.01, thick - 2.0 * e))
 	mi.mesh = bm
 	mi.material_override = mat
