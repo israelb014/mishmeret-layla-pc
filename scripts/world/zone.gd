@@ -59,9 +59,23 @@ func build() -> void:
 	_add_probe_and_decals()
 
 # ------------------------------------------------------------------ building helpers
+## Anti-z-fighting: every slab, wall and prop gets its own tiny offset (0.8 mm steps, < 1 cm),
+## so no two of their faces ever share a plane (flat model bases on floors, slab ends meeting,
+## props standing in the same spot). Invisible to the eye, resolvable by the depth buffer.
+var geo_seq := 0
+func _geo_eps() -> float:
+	geo_seq += 1
+	return 0.0008 * float(geo_seq % 12)
+
+var placed := {} # identical placements (same prefab, spot and angle) are made only once
+
 func place(nm: String, x: float, zz: float, rot_deg: float, o: Dictionary = {}) -> Node3D:
+	var key := "%s|%d|%d|%d|%d" % [nm, roundi(x * 100.0), roundi(zz * 100.0), roundi(float(o.get("y", 0.0)) * 100.0), roundi(rot_deg)]
+	if placed.has(key) and is_instance_valid(placed[key]):
+		return placed[key]
 	var obj := prefabs.make(nm, U.tint(o.get("tint")))
-	obj.position = Vector3(x, float(o.get("y", 0.0)), zz)
+	placed[key] = obj
+	obj.position = Vector3(x, float(o.get("y", 0.0)) + 0.001 + _geo_eps(), zz)
 	obj.rotation_degrees = Vector3(float(o.get("rx", 0.0)), rot_deg, float(o.get("rz", 0.0)))
 	if o.has("scale"):
 		obj.scale = Vector3.ONE * float(o["scale"])
@@ -123,10 +137,11 @@ func _set_shadow(n: Node, on: bool) -> void:
 func slab(mat: Material, w: float, d: float, x: float, y: float, zz: float, h := 0.02, parent: Node3D = null) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(w, h, d)
+	var e := _geo_eps()
+	bm.size = Vector3(maxf(0.01, w - 2.0 * e), h, maxf(0.01, d - 2.0 * e))
 	mi.mesh = bm
 	mi.material_override = mat
-	mi.position = Vector3(x, y - h / 2.0, zz)
+	mi.position = Vector3(x, y - h / 2.0 - e, zz)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if h > 0.3 else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	(parent if parent else static_root).add_child(mi)
 	add_box_collider(mi, AABB(-bm.size / 2.0, bm.size), "stone")
@@ -135,10 +150,11 @@ func slab(mat: Material, w: float, d: float, x: float, y: float, zz: float, h :=
 func wall(mat: Material, w: float, h: float, x: float, y: float, zz: float, rot := 0.0, thick := 0.3, parent: Node3D = null) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var bm := BoxMesh.new()
-	bm.size = Vector3(w, h, thick)
+	var e := _geo_eps()
+	bm.size = Vector3(maxf(0.01, w - 2.0 * e), maxf(0.01, h - e), maxf(0.01, thick - 2.0 * e))
 	mi.mesh = bm
 	mi.material_override = mat
-	mi.position = Vector3(x, y + h / 2.0, zz)
+	mi.position = Vector3(x, y + (h - e) / 2.0, zz)
 	mi.rotation.y = rot
 	(parent if parent else static_root).add_child(mi)
 	add_box_collider(mi, AABB(-bm.size / 2.0, bm.size), "stone")
@@ -179,6 +195,7 @@ func multimesh(mesh: Mesh, mat: Material, xforms: Array, colors: Array = []) -> 
 			mm.set_instance_color(i, colors[i])
 	var mmi := MultiMeshInstance3D.new()
 	mmi.multimesh = mm
+	mmi.set_meta("xforms", xforms) # headless servers do not keep instance transforms (geometry CI check)
 	mmi.material_override = mat
 	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	static_root.add_child(mmi)

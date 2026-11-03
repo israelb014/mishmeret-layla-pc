@@ -5,7 +5,7 @@ extends RefCounted
 ## by more than 4 cm^2 -- the faces that flicker against each other. Faces pointing in opposite
 ## directions are not reported: one of them is always culled or hidden inside the other volume.
 
-const PLANE_EPS := 0.002
+const PLANE_EPS := 0.0004 # reversed-Z float depth separates anything farther apart than this
 const MIN_AREA := 0.0004
 
 var faces_cache := {} # Mesh -> PackedVector3Array (local triangles)
@@ -26,9 +26,11 @@ func check_zone(root: Node3D) -> Array:
 		elif node is MultiMeshInstance3D and (node as MultiMeshInstance3D).multimesh != null:
 			var mm := (node as MultiMeshInstance3D).multimesh
 			var base := Prefabs._rel_xf(root, node)
+			var xfs: Array = node.get_meta("xforms") if node.has_meta("xforms") else []
 			for i in mm.instance_count:
 				owner_id += 1
-				_add(buckets, owner_id, base * mm.get_instance_transform(i), mm.mesh, "%s#%d" % [_label(root, node), i])
+				var ixf: Transform3D = xfs[i] if i < xfs.size() else mm.get_instance_transform(i)
+				_add(buckets, owner_id, base * ixf, mm.mesh, "%s#%d" % [_label(root, node), i])
 	var problems := []
 	var seen := {}
 	for key in buckets:
@@ -49,12 +51,14 @@ func check_zone(root: Node3D) -> Array:
 				var area := _overlap(t1, t2)
 				if area > MIN_AREA:
 					seen[pair] = true
-					problems.append("%s  <->  %s  (plane n=%s d=%.3f, overlap %.4f m2)" % [t1[6], t2[6], (t1[1] as Vector3).snapped(Vector3(0.01, 0.01, 0.01)), float(t1[2]), area])
+					problems.append("%s  <->  %s  (plane n=%s d=%.4f at %s, overlap %.4f m2)" % [t1[6], t2[6], (t1[1] as Vector3).snapped(Vector3(0.01, 0.01, 0.01)), float(t1[2]), (t1[3] as Vector3).snapped(Vector3(0.1, 0.1, 0.1)), area])
 	return problems
 
 func _label(root: Node, n: Node) -> String:
 	var p := String(root.get_path_to(n))
-	return p if p.length() < 90 else "..." + p.right(87)
+	if p.length() > 80: p = "..." + p.right(77)
+	var m = n.get("mesh") if n is MeshInstance3D else (n.multimesh.mesh if n is MultiMeshInstance3D else null)
+	return "%s[%s]" % [p, m.get_class() if m else "?"]
 
 func _add(buckets: Dictionary, owner: int, xf: Transform3D, mesh: Mesh, label: String) -> void:
 	var f: PackedVector3Array
