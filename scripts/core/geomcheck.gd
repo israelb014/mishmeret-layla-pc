@@ -46,6 +46,7 @@ func check_zone(root: Node3D) -> Array:
 				if t1[0] == t2[0]: continue
 				if absf(float(t1[2]) - float(t2[2])) > PLANE_EPS: continue
 				if (t1[1] as Vector3).dot(t2[1]) < 0.999: continue
+				if not _coplanar(t1, t2) or not _coplanar(t2, t1): continue
 				var pair := "%s|%s" % [t1[6], t2[6]] if String(t1[6]) < String(t2[6]) else "%s|%s" % [t2[6], t1[6]]
 				if seen.has(pair): continue
 				var area := _overlap(t1, t2)
@@ -80,6 +81,15 @@ func _add(buckets: Dictionary, owner: int, xf: Transform3D, mesh: Mesh, label: S
 		var key := "%d,%d,%d,%d" % [roundi(n.x * 100.0), roundi(n.y * 100.0), roundi(n.z * 100.0), floori(d / PLANE_EPS)]
 		if not buckets.has(key): buckets[key] = []
 		(buckets[key] as Array).append([owner, n, d, a, b, c, label])
+
+## Every vertex of triangle b lies within PLANE_EPS of triangle a's plane (truly coplanar,
+## not just two slightly tilted planes crossing each other).
+static func _coplanar(a: Array, b: Array) -> bool:
+	var n: Vector3 = a[1]
+	var d: float = a[2]
+	for k in 3:
+		if absf(n.dot(b[3 + k]) - d) > PLANE_EPS: return false
+	return true
 
 ## Overlapping area of two coplanar triangles (projected on their dominant plane).
 func _overlap(t1: Array, t2: Array) -> float:
