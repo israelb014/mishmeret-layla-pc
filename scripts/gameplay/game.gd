@@ -210,6 +210,11 @@ func setup_stage(index: int, menu := false) -> void:
 		fx.set_ambient(camera, Color(1, 0.95, 0.85, 0.35) if not stage.get("night", false) else Color(0.7, 0.85, 1.0, 0.3), 220)
 
 func _apply_environment(def: Dictionary) -> void:
+	apply_environment_to(def, env, sun, cam_attr)
+
+## Sky, fog, tonemapping and sun of a stage, applied to any WorldEnvironment/sun/camera
+## attributes (the game world, or the live loading/menu background in its own world).
+func apply_environment_to(def: Dictionary, wenv: WorldEnvironment, dsun: DirectionalLight3D, attr: CameraAttributesPractical) -> void:
 	var e := Environment.new()
 	var hdr: Texture2D = main.loaded.get("res://assets/hdr/%s.hdr" % def["hdri"])
 	if hdr == null: hdr = load("res://assets/hdr/%s.hdr" % def["hdri"])
@@ -276,40 +281,40 @@ func _apply_environment(def: Dictionary) -> void:
 	e.volumetric_fog_length = 80.0
 	e.volumetric_fog_sky_affect = 0.0
 	e.volumetric_fog_ambient_inject = 0.15
-	env.environment = e
+	wenv.environment = e
 	# subtle auto exposure
-	cam_attr.auto_exposure_enabled = true
-	cam_attr.auto_exposure_scale = 0.35
-	cam_attr.auto_exposure_speed = 0.6
-	cam_attr.dof_blur_far_enabled = false
-	cam_attr.dof_blur_near_enabled = false
+	attr.auto_exposure_enabled = true
+	attr.auto_exposure_scale = 0.35
+	attr.auto_exposure_speed = 0.6
+	attr.dof_blur_far_enabled = false
+	attr.dof_blur_near_enabled = false
 	# sun
 	var sd: Dictionary = def["sun"]
-	sun.light_color = U.col(sd["color"])
-	sun.light_energy = float(sd["intensity"]) * 0.42
+	dsun.light_color = U.col(sd["color"])
+	dsun.light_energy = float(sd["intensity"]) * 0.42
 	var dir := U.v3(sd["dir"]).normalized()
 	if def.has("hdriSun"):
 		var hs: Dictionary = def["hdriSun"]
 		var a := (float(hs["u"]) - 0.5) * TAU
 		var el := deg_to_rad(maxf(float(hs["elev"]), float(hs.get("minElev", 12))))
 		dir = Vector3(cos(a) * cos(el), sin(el), sin(a) * cos(el)).rotated(Vector3.UP, -deg_to_rad(float(def.get("envRotation", 0)))).normalized()
-	sun.look_at_from_position(dir * 60.0, Vector3.ZERO, Vector3.UP if absf(dir.y) < 0.99 else Vector3.FORWARD)
+	dsun.look_at_from_position(dir * 60.0, Vector3.ZERO, Vector3.UP if absf(dir.y) < 0.99 else Vector3.FORWARD)
 	var sq: int = int(Settings.g("shadows"))
-	sun.shadow_enabled = sq > 0
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if sq >= 2 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	dsun.shadow_enabled = sq > 0
+	dsun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if sq >= 2 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	RenderingServer.directional_shadow_atlas_set_size([2048, 4096, 8192, 8192][sq], true)
 	RenderingServer.directional_soft_shadow_filter_set_quality([0, 2, 3, 4][sq] as RenderingServer.ShadowQuality)
-	sun.directional_shadow_max_distance = [60.0, 90.0, 110.0, 140.0][sq]
+	dsun.directional_shadow_max_distance = [60.0, 90.0, 110.0, 140.0][sq]
 	# stable PSSM: fixed split distribution, blended splits, enough bias/blur to stop swimming
-	sun.directional_shadow_split_1 = 0.07
-	sun.directional_shadow_split_2 = 0.18
-	sun.directional_shadow_split_3 = 0.42
-	sun.directional_shadow_blend_splits = true
-	sun.directional_shadow_fade_start = 0.85
-	sun.directional_shadow_pancake_size = 30.0
-	sun.shadow_bias = 0.04
-	sun.shadow_normal_bias = 1.4
-	sun.shadow_blur = 1.6
+	dsun.directional_shadow_split_1 = 0.07
+	dsun.directional_shadow_split_2 = 0.18
+	dsun.directional_shadow_split_3 = 0.42
+	dsun.directional_shadow_blend_splits = true
+	dsun.directional_shadow_fade_start = 0.85
+	dsun.directional_shadow_pancake_size = 30.0
+	dsun.shadow_bias = 0.04
+	dsun.shadow_normal_bias = 1.4
+	dsun.shadow_blur = 1.6
 
 func clear_stage() -> void:
 	for a in actors: a.remove()
@@ -465,7 +470,6 @@ func play_intro() -> void:
 	state = "intro"
 	main.set_aiming(true)
 	var dur := float(stage["intro"]["duration"])
-	later(minf(2.5, dur * 0.4), main.capture_shot.bind(["street", "port", "station"][stage_index]))
 	ui.stage_title(String(stage["title"]), String(stage["subtitle"]), dur, stage_index)
 	# cinematic depth of field during the intro fly-through
 	cam_attr.dof_blur_far_enabled = true
@@ -515,7 +519,6 @@ func start_encounter(z: Zone) -> void:
 		boss = Boss.new(self, d["boss"], z)
 		boss.begin()
 		actors.append(boss)
-		later(3.0, main.capture_shot.bind("boss"))
 		ui.callout(String(d["boss"].get("title", "בוס!")), "boss", "")
 	next_wave()
 

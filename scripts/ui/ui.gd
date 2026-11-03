@@ -25,8 +25,7 @@ var callouts := VBoxContainer.new()
 var title_layer := Control.new()
 var perf_label := Label.new()
 var loading_status: Label
-var backdrop := Slideshow.new()
-var shots_dirty := true
+var backdrop := Showcase.new()
 const TIPS := [
 	"ירי בנשק שביד האויב מנטרל אותו ומזכה ב־300 נקודות",
 	"רימון שנורה באוויר מתפוצץ בלי לפגוע בכם",
@@ -73,6 +72,7 @@ func setup(m: Node) -> void:
 	threat_layer.font = font_title; threat_layer.font_ui = font_ui
 	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
 	backdrop.visible = false
+	backdrop.load_cache() # images saved by earlier launches: on screen from the first frame
 	for c in [threat_layer, hud, flash, title_layer, backdrop, screens]:
 		c.set_anchors_preset(Control.PRESET_FULL_RECT)
 		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -476,21 +476,20 @@ func loading() -> ProgressLine:
 	root_c.add_child(line)
 	return line
 
-## The in-game shots behind loading, the menu (until stage 1 is live) and the results screen.
+## The live background (Showcase) behind loading, the menu and the results screen.
 func set_backdrop(on: bool, fade := 0.0) -> void:
 	if on:
-		if shots_dirty:
-			backdrop.set_shots(Slideshow.load_shots())
-			shots_dirty = false
 		backdrop.modulate.a = 1.0
 		backdrop.visible = true
+		backdrop.set_active(true)
 	elif backdrop.visible:
 		if fade <= 0.0:
 			backdrop.visible = false
+			backdrop.set_active(false)
 		else:
 			var tw := create_tween()
 			tw.tween_property(backdrop, "modulate:a", 0.0, fade)
-			tw.tween_callback(func(): backdrop.visible = false)
+			tw.tween_callback(func(): backdrop.visible = false; backdrop.set_active(false))
 
 ## progress 0..1 with real per-file progress, plus a Hebrew status line
 func set_loading(r, frac: float, status := "") -> void:

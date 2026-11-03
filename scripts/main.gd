@@ -26,7 +26,7 @@ var job_status := ""
 var common_ready := false
 var inflight: Array = [] # every threaded load request not collected yet (joined before quitting)
 var quitting := false
-var capture_tasks: Array = [] # WorkerThreadPool tasks writing captured loading-screen shots
+var showcase_busy := false # a stage's viewpoints are being added to the live background
 var results_stage := -1
 var flow := {} # --flowtest driver state
 const STATUS := {"tex": "טוען טקסטורות", "char": "טוען דמויות ואנימציות", "model": "טוען מודלים", "sky": "טוען שמיים"}
@@ -43,6 +43,7 @@ func _ready() -> void:
 	add_child(game)
 	game.setup(self)
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
+	ui.backdrop.game = game
 	var args := OS.get_cmdline_args() + OS.get_cmdline_user_args()
 	if args.has("--benchmark"):
 		bench = {"kind": "benchmark", "results": []}
@@ -52,11 +53,6 @@ func _ready() -> void:
 		bench = {"kind": "autotest", "results": [], "errors": 0}
 	elif args.has("--shots"):
 		bench = {"kind": "shots", "results": []}
-	elif args.has("--loadshots"):
-		bench = {"kind": "loadshots", "results": []}
-		# software rendering in CI: small window (the captures render at 1280x720 off-screen)
-		if DisplayServer.get_name() != "headless":
-			get_window().size = Vector2i(640, 360)
 	elif args.has("--flowtest"):
 		bench = {"kind": "flow", "results": []}
 	get_tree().set_auto_accept_quit(false)
@@ -69,6 +65,17 @@ func _boot() -> void:
 	if not bench.is_empty() and bench["kind"] != "flow":
 		await _run_bench()
 		return
+	# loading screen (title + tip + thin line over the saved images, or the dark background on the
+	# very first launch) until stage 1's first zones render live behind it; then the menu
+	loading = true
+	var line := ui.loading()
+	_start_job(0)
+	while not ui.backdrop.has_live() and not (prepared == 0 and preparing == -1):
+		if quitting: return
+		ui.set_loading(line, minf(1.0, job_progress / 0.4), job_status)
+		await get_tree().process_frame
+	ui.set_loading(line, 1.0)
+	loading = false
 	await show_menu()
 
 func _empty_groups() -> Dictionary:
@@ -160,12 +167,28 @@ func _stream_poll() -> void:
 			streaming.remove_at(i)
 			inflight.erase(p)
 		i -= 1
-	var j := capture_tasks.size() - 1
-	while j >= 0:
-		if WorkerThreadPool.is_task_completed(capture_tasks[j]):
-			WorkerThreadPool.wait_for_task_completion(capture_tasks[j])
-			capture_tasks.remove_at(j)
-		j -= 1
+	ui.backdrop.poll_tasks()
+	# stages 2-3 join the live background once streamed, but only while it is on screen
+	# (building its zones would hitch gameplay)
+	if common_ready and not showcase_busy and ui.backdrop.active:
+		for si in [1, 2]:
+			if not ui.backdrop.has_stage(si) and _stage_files_loaded(si):
+				_add_showcase(si)
+				break
+
+func _stage_files_loaded(i: int) -> bool:
+	var g := _stage_groups(i)
+	for k in g:
+		for p in g[k]:
+			if not loaded.has(p): return false
+	return true
+
+func _add_showcase(i: int) -> void:
+	showcase_busy = true
+	await _prepare_prefabs(stage_assets["stages"][i], func(_f): pass)
+	if not quitting:
+		await ui.backdrop.add_stage(i)
+	showcase_busy = false
 
 func _report_load_time() -> void:
 	if load_time_reported: return
@@ -195,6 +218,14 @@ func _job(index: int) -> void:
 		Character.init_library()
 		await game.make_graffiti_textures()
 		common_ready = true
+	if not ui.backdrop.has_stage(index) and not showcase_busy:
+		# the loading screen / menu turns live as early as possible
+		showcase_busy = true
+		await _prepare_prefabs(stage_assets["stages"][index], func(f): job_progress = 0.34 + 0.04 * f; job_status = "מכין מודלים")
+		if quitting: return
+		await ui.backdrop.add_stage(index)
+		showcase_busy = false
+	if quitting: return
 	await _build_stage(index)
 	if quitting: return
 	prepared = index
@@ -258,8 +289,6 @@ func _build_stage(index: int) -> void:
 		job_progress = 0.5 + 0.3 * float(i + 1) / defs.size(); job_status = "בונה את השלב"
 		await get_tree().process_frame
 	print("[load] zones built ", defs.size())
-	if bench.get("kind", "") == "loadshots":
-		return # CI shots: no shader warm-up needed (software rendering, stills only)
 	await warm_up(index, func(f): job_progress = 0.8 + 0.2 * f; job_status = "מכין אפקטים")
 	print("[load] warm-up done")
 
@@ -348,41 +377,25 @@ func show_menu() -> void:
 	set_aiming(false)
 	ui.hud_show(false)
 	game.state = "menu"
-	var live := prepared == 0 and preparing == -1
-	ui.set_backdrop(not live)
+	ui.set_backdrop(true) # live background (saved images until the live views are ready)
 	ui.menu()
 	Sfx.play_music("menu")
 	_report_load_time()
-	# stage 1 is prepared behind the shots; the menu turns into the live fly-through when ready
+	# stage 1 is prepared behind the menu, so starting it does not wait
 	while not (prepared == 0 and preparing == -1):
 		if mode != "menu" or quitting: return
 		if preparing == -1: _start_job(0)
 		await get_tree().process_frame
-	if mode != "menu" or quitting: return
-	game.setup_stage(0, true)
-	for i in 3: game.ensure_zone(i)
-	var z0: Zone = game.zones[0]
-	var path := []
-	for p in game.stage["menuPath"]: path.append(game.to_world(z0, p))
-	var look := game.to_world(z0, game.stage["intro"]["look"])
-	game.state = "menu"
-	_fly_menu(path, look)
-	ui.set_backdrop(false, 1.2)
-	print("MENU_LIVE_MS=%d" % Time.get_ticks_msec())
+	if not flow.has("stage1_ready"):
+		flow["stage1_ready"] = true
+		print("STAGE1_READY_MS=%d" % Time.get_ticks_msec())
+	# stages 2-3 stream in the background (and join the live background when done)
 	_stream_stage(1)
-
-func _fly_menu(path: Array, look: Vector3) -> void:
-	if mode != "menu": return
-	game.rail.jump(path[0], look)
-	game.rail.move_along(path.slice(1), {"duration": 34.0, "linear": true, "travel": true, "look_ahead": 0.05, "on_done": _fly_menu.bind(path, look)})
+	_stream_stage(2)
 
 func start_run(diff: String, stage_i := 0, zone := 0, skip_intro := false) -> void:
-	var from_menu := mode == "menu"
 	mode = "game"
 	ui.clear_screen()
-	if from_menu:
-		# the fly-through zones go back to the prepared set: starting stage 1 needs no rebuild
-		game.return_zones_to_prebuilt()
 	await ensure_stage(stage_i)
 	if quitting: return
 	ui.clear_screen()
@@ -585,50 +598,11 @@ func quit_game(code := 0) -> void:
 			ResourceLoader.load_threaded_get(p)
 	inflight.clear()
 	streaming.clear()
-	for id in capture_tasks:
-		WorkerThreadPool.wait_for_task_completion(id)
-	capture_tasks.clear()
+	ui.backdrop.wait_tasks()
 	game.warming = false
 	cleanup()
 	print("QUIT_CLEAN code=%d" % code)
 	get_tree().quit(code)
-
-# ------------------------------------------------------------------ loading-screen shots
-## Captures the current game view (3D only, no HUD) into user://loading/<key>.jpg the first time
-## the player sees that scene; the loading screens then show the player's own game.
-func capture_shot(key: String) -> void:
-	if DisplayServer.get_name() == "headless" or quitting or not bench.is_empty(): return
-	var path := "user://loading/%s.jpg" % key
-	if FileAccess.file_exists(path): return
-	var img := await _capture_image()
-	if img == null or quitting: return
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://loading"))
-	var abs_path := ProjectSettings.globalize_path(path)
-	capture_tasks.append(WorkerThreadPool.add_task(func(): img.save_jpg(abs_path, 0.88)))
-	ui.shots_dirty = true
-
-## One extra render of the game camera into an off-screen viewport sharing the game world.
-func _capture_image() -> Image:
-	var vp := SubViewport.new()
-	vp.size = Vector2i(1280, 720)
-	vp.world_3d = get_viewport().world_3d
-	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
-	vp.msaa_3d = Viewport.MSAA_4X
-	var cam := Camera3D.new()
-	cam.attributes = CameraAttributesPractical.new() # no DOF / auto exposure on the still
-	vp.add_child(cam)
-	add_child(vp)
-	cam.global_transform = game.camera.global_transform
-	cam.fov = game.camera.fov
-	cam.near = game.camera.near
-	cam.far = game.camera.far
-	cam.current = true
-	await RenderingServer.frame_post_draw
-	await RenderingServer.frame_post_draw
-	var img := vp.get_texture().get_image()
-	vp.queue_free()
-	if img == null or img.is_empty(): return null
-	return img
 
 # ------------------------------------------------------------------ --flowtest (CI)
 ## Plays the real player path headless: menu -> start -> stage 1..3 with results screens in
@@ -685,13 +659,6 @@ static func perf_stats(ft: PackedFloat32Array) -> Dictionary:
 
 # ------------------------------------------------------------------ benchmark / autotest / screenshots
 func _run_bench() -> void:
-	if bench["kind"] == "loadshots":
-		# bundled loading-screen shots (CI): street, port at sunset, night station, a boss
-		bench["plan"] = [{"stage": 0, "zone": 0, "branch": "left", "key": "street"}, {"stage": 1, "zone": 0, "branch": "left", "key": "port"},
-			{"stage": 2, "zone": 2, "branch": "left", "key": "station"}, {"stage": 2, "zone": 7, "branch": "left", "key": "boss"}]
-		bench["step"] = -1
-		await _bench_next()
-		return
 	var plan := []
 	var only := []
 	for a in OS.get_cmdline_user_args():
@@ -735,9 +702,6 @@ func _bench_next() -> void:
 
 func _bench_tick() -> void:
 	if not bench.get("running", false): return
-	if bench["kind"] == "loadshots":
-		_loadshot_tick()
-		return
 	var z := game.zone_idx
 	if game.state == "intro":
 		game.rail.time = game.rail.duration
@@ -781,26 +745,6 @@ func _bench_tick() -> void:
 		game.autoplay = null
 		game.clear_stage()
 		_bench_next.call_deferred()
-
-func _loadshot_tick() -> void:
-	var p: Dictionary = bench["plan"][bench["step"]]
-	if game.state == "intro": game.rail.time = game.rail.duration
-	var need := 3.0 if p["key"] == "boss" else 1.0
-	var f := Engine.get_physics_frames()
-	if f % 120 == 0:
-		print("LOADSHOT_TICK key=%s state=%s zone=%d wave_time=%s ms=%d" % [p["key"], game.state, game.zone_idx, str(game.encounter["wave_time"]) if game.encounter != null else "-", Time.get_ticks_msec()])
-	if game.encounter == null or float(game.encounter["wave_time"]) < need: return
-	bench["running"] = false
-	print("LOADSHOT_CAPTURE ", p["key"])
-	var img := await _capture_image()
-	var dir := OS.get_environment("LOADSHOTS_DIR")
-	if img != null and dir != "":
-		img.save_jpg(dir.path_join("%s.jpg" % p["key"]), 0.88)
-		print("LOADSHOT ", p["key"])
-	bench["results"].append({"stage": p["stage"] + 1, "zone": p["key"], "branch": "left", "avg": 0.0, "low1": 0.0, "worst_ms": 0.0})
-	game.autoplay = null
-	game.clear_stage()
-	_bench_next.call_deferred()
 
 func _screenshot(nm: String) -> void:
 	if DisplayServer.get_name() == "headless": return

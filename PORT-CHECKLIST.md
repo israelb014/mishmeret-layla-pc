@@ -11,7 +11,7 @@
 - ✓ בחירת מסלול בשלטי חצים (ירי בשלט), ברירת מחדל: הענף השמאלי אחרי 9 שניות — `Game.show_branch` / `choose_branch`
 - ✓ מסילת מצלמה חלקה עם מבט, מהירויות, תנועות "swoop" ורעידות — `scripts/gameplay/rail.gd` (Curve3D)
 - ✓ פתיח שלב עם כותרת ותת־כותרת — `Game.play_intro`, `UI.stage_title`
-- ✓ טיסת מצלמה ברקע של התפריט הראשי (`menuPath`) — `Main._fly_menu`
+- ✓ רקע חי לתפריט הראשי — בגרסת PC: זונות אמיתיות מכל השלבים, מרונדרות בזמן אמת עם החלפה כל 4 שניות (`scripts/ui/showcase.gd`), במקום טיסת המצלמה על `menuPath`
 - ✓ סיבוב שמיים לכל שלב (`envRotation`) וכיוון שמש מה־HDRI (`hdriSun`)
 - ✓ ערפל, bloom, חשיפה, עוצמת סביבה ורקע לכל שלב, ואבק באוויר — `Game._apply_environment`
 
