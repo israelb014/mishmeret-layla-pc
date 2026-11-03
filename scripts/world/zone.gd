@@ -100,7 +100,7 @@ func place(nm: String, x: float, zz: float, rot_deg: float, o: Dictionary = {}) 
 		return placed[key]
 	var obj := prefabs.make(nm, U.tint(o.get("tint")))
 	if not grouped: placed[key] = obj
-	obj.position = Vector3(x, float(o.get("y", 0.0)) + 0.001 + _geo_eps(), zz)
+	obj.position = Vector3(x, float(o.get("y", 0.0)) + 0.002 + _geo_eps(), zz)
 	obj.rotation_degrees = Vector3(float(o.get("rx", 0.0)), rot_deg, float(o.get("rz", 0.0)))
 	if o.has("scale"):
 		obj.scale = Vector3.ONE * float(o["scale"])
@@ -180,11 +180,12 @@ func wall(mat: Material, w: float, h: float, x: float, y: float, zz: float, rot 
 	var aligned := absf(q - roundf(q)) < 0.001
 	var swap := aligned and posmod(roundi(q), 2) == 1
 	var wsize := Vector3(thick, h, w) if swap else Vector3(w, h, thick)
-	var e := _box_eps(parent if parent else static_root, Vector3(x, y + h / 2.0, zz), wsize, Vector3(1, 0.5, 1), 0.5) if aligned else _geo_eps()
-	bm.size = Vector3(maxf(0.01, w - 2.0 * e), maxf(0.01, h - e), maxf(0.01, thick - 2.0 * e))
+	# inset on every side, bottom included (walls meeting at corners/pillars share their floor plane)
+	var e := _box_eps(parent if parent else static_root, Vector3(x, y + h / 2.0, zz), wsize, Vector3(1, 1, 1), 0.0) if aligned else _geo_eps()
+	bm.size = Vector3(maxf(0.01, w - 2.0 * e), maxf(0.01, h - 2.0 * e), maxf(0.01, thick - 2.0 * e))
 	mi.mesh = bm
 	mi.material_override = mat
-	mi.position = Vector3(x, y + (h - e) / 2.0, zz)
+	mi.position = Vector3(x, y + h / 2.0, zz)
 	mi.rotation.y = rot
 	(parent if parent else static_root).add_child(mi)
 	add_box_collider(mi, AABB(-bm.size / 2.0, bm.size), "stone")
