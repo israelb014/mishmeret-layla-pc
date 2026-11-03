@@ -786,8 +786,12 @@ func _loadshot_tick() -> void:
 	var p: Dictionary = bench["plan"][bench["step"]]
 	if game.state == "intro": game.rail.time = game.rail.duration
 	var need := 3.0 if p["key"] == "boss" else 1.0
+	var f := Engine.get_physics_frames()
+	if f % 120 == 0:
+		print("LOADSHOT_TICK key=%s state=%s zone=%d wave_time=%s ms=%d" % [p["key"], game.state, game.zone_idx, str(game.encounter["wave_time"]) if game.encounter != null else "-", Time.get_ticks_msec()])
 	if game.encounter == null or float(game.encounter["wave_time"]) < need: return
 	bench["running"] = false
+	print("LOADSHOT_CAPTURE ", p["key"])
 	var img := await _capture_image()
 	var dir := OS.get_environment("LOADSHOTS_DIR")
 	if img != null and dir != "":

@@ -49,12 +49,18 @@ jobs:
       - name: Render the bundled loading-screen shots (software GL, no HUD)
         continue-on-error: true
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri >/dev/null
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-vulkan-drivers >/dev/null
           mkdir -p assets/loading
+          # 1) Forward+ on lavapipe (software Vulkan) - the real renderer
           LOADSHOTS_DIR=$PWD/assets/loading BENCH_OUT=/tmp/loadshots.txt xvfb-run -a -s "-screen 0 1280x720x24" \
-            timeout 30m ~/godot/godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility --fixed-fps 60 -- --loadshots > loadshots.log 2>&1 || true
-          grep -E "LOADSHOT|\[load\]|SCRIPT ERROR|QUIT_CLEAN|LOAD_TIME|STAGE_WAIT" loadshots.log || true
-          tail -5 loadshots.log
+            timeout 25m ~/godot/godot --path . --rendering-driver vulkan --rendering-method forward_plus --fixed-fps 60 -- --loadshots > loadshots.log 2>&1 || true
+          grep -E "Vulkan|LOADSHOT|\[load\]|SCRIPT ERROR|QUIT_CLEAN|LOAD_TIME|crash" loadshots.log | head -60 || true
+          # 2) fallback: compatibility renderer on software GL
+          if [ "$(ls assets/loading/*.jpg 2>/dev/null | wc -l)" -lt 4 ]; then
+            LOADSHOTS_DIR=$PWD/assets/loading BENCH_OUT=/tmp/loadshots.txt xvfb-run -a -s "-screen 0 1280x720x24" \
+              timeout 25m ~/godot/godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility --fixed-fps 60 -- --loadshots > loadshots-gl.log 2>&1 || true
+            grep -E "OpenGL|LOADSHOT|\[load\]|SCRIPT ERROR|QUIT_CLEAN|crash" loadshots-gl.log | head -60 || true
+          fi
           ls -la assets/loading
 
       - name: Import the loading shots
@@ -117,6 +123,7 @@ jobs:
             build/linux/autotest.txt
             build/linux/flowtest.log
             loadshots.log
+            loadshots-gl.log
             assets/loading/*.jpg
           if-no-files-found: ignore
 
