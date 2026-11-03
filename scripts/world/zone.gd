@@ -101,6 +101,13 @@ func place(nm: String, x: float, zz: float, rot_deg: float, o: Dictionary = {}) 
 	var obj := prefabs.make(nm, U.tint(o.get("tint")))
 	if not grouped: placed[key] = obj
 	obj.position = Vector3(x, float(o.get("y", 0.0)) + 0.002 + _geo_eps(), zz)
+	# a flat base must never land on the top face of a slab/wall below it (prefabs sit on y = 0)
+	if not grouped:
+		var foot := AABB(Vector3(x - 0.3, obj.position.y - 0.01, zz - 0.3), Vector3(0.6, 0.02, 0.6))
+		for b in boxes:
+			if (b as AABB).intersects(foot) and absf((b as AABB).end.y - obj.position.y) < 0.002:
+				obj.position.y += 0.003
+				break
 	obj.rotation_degrees = Vector3(float(o.get("rx", 0.0)), rot_deg, float(o.get("rz", 0.0)))
 	if o.has("scale"):
 		obj.scale = Vector3.ONE * float(o["scale"])
