@@ -144,6 +144,28 @@ func wall(mat: Material, w: float, h: float, x: float, y: float, zz: float, rot 
 	add_box_collider(mi, AABB(-bm.size / 2.0, bm.size), "stone")
 	return mi
 
+## Continuous curb along local Z (or X): one mesh, UV u runs along the length so a striped
+## texture repeats every `period` metres. Only the visible faces are built (road face, top,
+## sidewalk-side lip, end caps); none of them lies in the plane of the road or the sidewalk.
+func curb_mesh(length: float, width: float, bottom: float, top: float, period: float) -> ArrayMesh:
+	var v := []; var n := []; var uv := [] # Arrays (references): the lambda below appends to them
+	var L := length; var u1 := L / period
+	var quad := func(a: Vector3, b: Vector3, c: Vector3, d: Vector3, nn: Vector3, ua: Vector2, ub: Vector2, uc: Vector2, ud: Vector2):
+		for q in [[a, ua], [b, ub], [c, uc], [a, ua], [c, uc], [d, ud]]:
+			v.append(q[0]); n.append(nn); uv.append(q[1])
+	# local frame: x across (0 = road face, width = sidewalk side), y up, z along (0..L)
+	quad.call(Vector3(0, bottom, 0), Vector3(0, top, 0), Vector3(0, top, L), Vector3(0, bottom, L), Vector3(-1, 0, 0), Vector2(0, 1), Vector2(0, 0), Vector2(u1, 0), Vector2(u1, 1))
+	quad.call(Vector3(0, top, 0), Vector3(width, top, 0), Vector3(width, top, L), Vector3(0, top, L), Vector3(0, 1, 0), Vector2(0, 0), Vector2(0, 1), Vector2(u1, 1), Vector2(u1, 0))
+	quad.call(Vector3(width, top, 0), Vector3(width, bottom, 0), Vector3(width, bottom, L), Vector3(width, top, L), Vector3(1, 0, 0), Vector2(0, 0), Vector2(0, 1), Vector2(u1, 1), Vector2(u1, 0))
+	quad.call(Vector3(0, bottom, 0), Vector3(width, bottom, 0), Vector3(width, top, 0), Vector3(0, top, 0), Vector3(0, 0, -1), Vector2(0, 1), Vector2(0.2, 1), Vector2(0.2, 0), Vector2(0, 0))
+	quad.call(Vector3(0, top, L), Vector3(width, top, L), Vector3(width, bottom, L), Vector3(0, bottom, L), Vector3(0, 0, 1), Vector2(0, 0), Vector2(0.2, 0), Vector2(0.2, 1), Vector2(0, 1))
+	var arr := []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = PackedVector3Array(v); arr[Mesh.ARRAY_NORMAL] = PackedVector3Array(n); arr[Mesh.ARRAY_TEX_UV] = PackedVector2Array(uv)
+	var m := ArrayMesh.new()
+	m.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	return m
+
 ## Instanced repeated geometry (curbs, lane dashes, sleepers)
 func multimesh(mesh: Mesh, mat: Material, xforms: Array, colors: Array = []) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()

@@ -47,6 +47,8 @@ func _init() -> void:
 		vp.size = Vector2i(1280, 720)
 		var cam := Camera3D.new()
 		cam.fov = 62.0
+		cam.near = 0.2
+		cam.far = 300.0
 		vp.add_child(cam)
 		add_child(vp)
 		var r := TextureRect.new()
@@ -138,7 +140,7 @@ func add_stage(index: int) -> void:
 		var path: Array = def.get("path", [[0, 1.7, 0]])
 		var p: Vector3 = off + U.v3(path[0])
 		var t: Vector3 = off + U.v3(def.get("look", [0, 1.5, -20]))
-		live.append({"kind": "live", "key": v["key"], "world": holder.world_3d, "pos": p, "target": t, "attr": attr})
+		live.append({"kind": "live", "key": v["key"], "world": holder.world_3d, "pos": p, "target": t, "attr": attr, "far": Game.far_for(stage)})
 		k += 1
 		await get_tree().process_frame
 	if k > 0 and not printed:
@@ -169,6 +171,7 @@ func _show(l: Dictionary, s: Dictionary) -> void:
 		vp.msaa_3d = main_vp.msaa_3d
 		vp.screen_space_aa = main_vp.screen_space_aa
 		(l["cam"] as Camera3D).attributes = s["attr"]
+		(l["cam"] as Camera3D).far = float(s["far"])
 		(l["cam"] as Camera3D).current = true
 		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		r.texture = vp.get_texture()

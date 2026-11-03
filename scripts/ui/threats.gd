@@ -8,6 +8,7 @@ var t := 0.0
 var popups: Array = [] # [world_pos, text, label, cls, age]
 var font: Font
 var font_ui: Font
+var popup_count := 0 # popups shown this session (CI HUD audit)
 
 func _process(dt: float) -> void:
 	t += dt
@@ -16,18 +17,25 @@ func _process(dt: float) -> void:
 	queue_redraw()
 
 func add_popup(pos: Vector3, text: String, label: String, cls: String) -> void:
+	popup_count += 1
 	if popups.size() > 24: popups.pop_front()
 	popups.append([pos, text, label, cls, 0.0])
 
-func _draw() -> void:
-	if game == null or game.camera == null: return
-	var cam: Camera3D = game.camera
+## Everything that gets a threat ring right now: living enemies with an active threat (a downed
+## enemy has none), and grenades in the air. Shared by drawing and the CI HUD audit.
+func ring_targets() -> Array:
 	var list := []
+	if game == null: return list
 	for a in game.actors:
 		if a.alive and a.threat != null and a.c.visible: list.append(a)
 	for o in game.objects:
 		if o.get("is_grenade") and o.alive and o.threat != null: list.append(o)
-	for a in list:
+	return list
+
+func _draw() -> void:
+	if game == null or game.camera == null: return
+	var cam: Camera3D = game.camera
+	for a in ring_targets():
 		var p: Vector3 = a.ring_anchor()
 		if cam.is_position_behind(p): continue
 		var sp := cam.unproject_position(p)

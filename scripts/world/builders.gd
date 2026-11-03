@@ -51,19 +51,29 @@ static func _in(z: Zone, parent: Node3D, nm: String, x: float, zz: float, rot: f
 	return obj
 
 # ------------------------------------------------------------------ street pieces
-static func _curb(z: Zone, x: float, z0: float, z1: float, colors: Array, along_x := false) -> void:
-	var length := absf(z1 - z0)
-	var n := maxi(1, roundi(length / 1.2))
-	var mesh := BoxMesh.new()
-	mesh.size = Vector3(length / n if along_x else 0.32, 0.2, 0.32 if along_x else length / n)
-	var mat: ORMMaterial3D = z.mats.get_mat("concrete", Color.WHITE, 1.5, 0.0, "curb").duplicate()
-	mat.vertex_color_use_as_albedo = true
-	var xf := []; var cols := []
-	for i in n:
-		var t := minf(z0, z1) + (i + 0.5) * length / n
-		xf.append(Transform3D(Basis(), Vector3(t if along_x else x, 0.08, x if along_x else t)))
-		cols.append(colors[i % 2])
-	z.multimesh(mesh, mat, xf, cols)
+## Continuous painted curb at the road edge. The road face sits 2 cm toward the road from the
+## sidewalk's side face and the top 2 cm above the sidewalk, the ends stop 1 cm short of the
+## slab ends: no face is coplanar with the road, the sidewalk or the next curb (no z-fighting).
+## One striped texture (1.2 m per colour) replaces the old alternating blocks (no shimmer).
+static func _curb(z: Zone, x: float, z0: float, z1: float, colors: Array, side: int, along_x := false) -> void:
+	var length := absf(z1 - z0) - 0.02
+	if length <= 0.1: return
+	var mi := MeshInstance3D.new()
+	mi.mesh = z.curb_mesh(length, 0.3, -0.04, 0.18, 2.4)
+	mi.material_override = z.mats.curb_stripes(colors[0], colors[1])
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# side: -1 = left curb (road is on +x), 1 = right curb (road on -x); along_x: road on +z/-z
+	var s := side
+	var road_face := x - s * 0.18 # old curb centre was 0.16 outside the road edge
+	var start := minf(z0, z1) + 0.01
+	if along_x:
+		# rotation θ maps local +x to (cos θ, 0, -sin θ): sidewalk at -z needs θ = +90°
+		mi.rotation.y = PI / 2.0 if s < 0 else -PI / 2.0
+		mi.position = Vector3(start if s < 0 else start + length, 0, road_face)
+	else:
+		mi.rotation.y = PI if s < 0 else 0.0
+		mi.position = Vector3(road_face, 0, start + length if s < 0 else start)
+	z.static_root.add_child(mi)
 
 static func _dashes(z: Zone, x: float, z0: float, z1: float, o: Dictionary = {}) -> void:
 	var w := f(o, "w", 0.15); var length := f(o, "len", 3.0); var gap := f(o, "gap", 4.0)
@@ -79,6 +89,17 @@ static func _dashes(z: Zone, x: float, z0: float, z1: float, o: Dictionary = {})
 		var t := minf(z0, z1) + i * (length + gap) + length / 2.0
 		xf.append(Transform3D(Basis(), Vector3(t if along_x else x, y, x if along_x else t)))
 	z.multimesh(mesh, z.mats.paint(U.col(o.get("color", 0xf2f2f2)), 0.55), xf)
+
+## One continuous painted line along Z (y = height of the paint above the surface below it).
+static func _strip(z: Zone, x: float, z0: float, z1: float, w: float, color: Color, y: float) -> void:
+	var mi := MeshInstance3D.new()
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(w, absf(z1 - z0))
+	mi.mesh = pm
+	mi.material_override = z.mats.paint(color, 0.55)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.position = Vector3(x, y, (z0 + z1) / 2.0)
+	z.static_root.add_child(mi)
 
 static func _crosswalk(z: Zone, x: float, zz: float, width: float, along_x := false) -> void:
 	var n := int(width / 1.0)
@@ -223,8 +244,8 @@ static func set_street(z: Zone, p: Dictionary) -> void:
 		z.slab(pavers, sw, length, x - W / 2.0 - sw / 2.0, 0.16, zc, 0.36)
 		z.slab(pavers, sw, length, x + W / 2.0 + sw / 2.0, 0.16, zc, 0.36)
 		var curbs: Array = CURBS[String(p.get("curbs", "redwhite"))]
-		_curb(z, x - W / 2.0 - 0.16, z0, z1, CURBS[p["curbsL"]] if p.has("curbsL") else curbs)
-		_curb(z, x + W / 2.0 + 0.16, z0, z1, CURBS[p["curbsR"]] if p.has("curbsR") else curbs)
+		_curb(z, x - W / 2.0 - 0.16, z0, z1, CURBS[p["curbsL"]] if p.has("curbsL") else curbs, -1)
+		_curb(z, x + W / 2.0 + 0.16, z0, z1, CURBS[p["curbsR"]] if p.has("curbsR") else curbs, 1)
 	if on(p, "center"):
 		_dashes(z, x, z0, z1)
 	if on(p, "buildings"):
@@ -296,7 +317,7 @@ static func set_crossStreet(z: Zone, p: Dictionary) -> void:
 	var length := x1 - x0; var xc := (x0 + x1) / 2.0
 	z.slab(z.mats.get_mat("asphalt", Color("#c4c4c4"), 4.0), length, W, xc, 0, zz, 0.2)
 	z.slab(z.mats.get_mat("pavers", Color("#e6ded0"), 3.0), length, sw, xc, 0.16, zz - W / 2.0 - sw / 2.0, 0.36)
-	_curb(z, zz - W / 2.0 - 0.16, x0, x1, CURBS[String(p.get("curbs", "redwhite"))], true)
+	_curb(z, zz - W / 2.0 - 0.16, x0, x1, CURBS[String(p.get("curbs", "redwhite"))], -1, true)
 	_dashes(z, zz, x0, x1, {"alongX": true})
 	if on(p, "crosswalk"):
 		_crosswalk(z, 0, zz + W / 2.0 + 1.6, f(p, "cwWidth", 8))
@@ -448,7 +469,8 @@ static func set_platform(z: Zone, p: Dictionary) -> void:
 	var x := f(p, "x", 0); var zz := f(p, "z", -30); var w := f(p, "w", 8); var d := f(p, "d", 80); var h := 1.1
 	z.slab(z.mats.get_mat("tiles", Color("#e9e9e4"), 2.0), w, d, x, h, zz, h)
 	for s in p.get("edges", [1]):
-		_dashes(z, x + float(s) * (w / 2.0 - 0.5), zz + d / 2.0, zz - d / 2.0, {"len": 2, "gap": 0.01, "w": 0.3, "color": 0xffd200, "y": h + 0.012})
+		# continuous safety line (one strip, 12 mm above the floor): no seams to shimmer
+		_strip(z, x + float(s) * (w / 2.0 - 0.5), zz + d / 2.0 - 0.3, zz - d / 2.0 + 0.3, 0.3, Color("#ffd200"), h + 0.012)
 	var pz := zz + d / 2.0 - 6.0
 	while pz > zz - d / 2.0 + 4.0:
 		z.place("pillar", x, pz, 0, {"y": h})

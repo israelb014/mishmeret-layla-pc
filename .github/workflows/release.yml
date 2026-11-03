@@ -61,7 +61,7 @@ jobs:
           BENCH_OUT=$PWD/autotest.txt timeout 60m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --autotest > autotest.log 2>&1
           code=$?
           set -e
-          grep -E "LOAD_TIME_MS|STAGE_WAIT_MS|BENCH_STUCK|SCRIPT ERROR|zones:|QUIT_CLEAN|Aborted|core dumped" autotest.log || true
+          grep -E "LOAD_TIME_MS|STAGE_WAIT_MS|BENCH_STUCK|SCRIPT ERROR|zones:|HUD_CHECK|HUD_PROBLEM|QUIT_CLEAN|Aborted|core dumped" autotest.log || true
           echo "---- errors (exit-time leak reports excluded) ----"
           grep -E "SCRIPT ERROR|^ERROR" autotest.log | grep -vE "leaked|still in use at exit|Pages in use" | sort | uniq -c | head -40 || true
           echo "exit code: $code"
@@ -69,22 +69,38 @@ jobs:
           grep -q "stuck: 0" autotest.log
           grep -E "zones: 30 " autotest.log
           grep -q "QUIT_CLEAN code=0" autotest.log
+          grep -q "HUD_CHECK .* problems=0" autotest.log
           ! grep -qE "SCRIPT ERROR|Aborted|core dumped|not supported by hardware" autotest.log
 
       - name: Real player flow of the exported Linux build (menu -> stages 1-3 -> ending, quit)
+        if: success() || failure()
         run: |
           cd build/linux
           set +e
           timeout 60m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --flowtest > flowtest.log 2>&1
           code=$?
           set -e
-          grep -E "LOAD_TIME_MS|LIVE_BACKGROUND_MS|STAGE1_READY_MS|STAGE_WAIT_MS|FLOW|ready at|QUIT_CLEAN|SCRIPT ERROR|Aborted|core dumped" flowtest.log || true
+          grep -E "LOAD_TIME_MS|LIVE_BACKGROUND_MS|STAGE1_READY_MS|STAGE_WAIT_MS|FLOW|ready at|HUD_CHECK|HUD_PROBLEM|QUIT_CLEAN|SCRIPT ERROR|Aborted|core dumped" flowtest.log || true
           echo "exit code: $code"
           test $code -eq 0
           grep -q "FLOW_DONE stages=3" flowtest.log
           grep -q "LIVE_BACKGROUND_MS=" flowtest.log
+          grep -q "HUD_CHECK .* problems=0" flowtest.log
           grep -q "QUIT_CLEAN code=0" flowtest.log
           ! grep -qE "SCRIPT ERROR|Aborted|core dumped" flowtest.log
+
+      - name: Z-fighting scan of every built zone (coplanar overlapping faces of different meshes)
+        if: success() || failure()
+        run: |
+          cd build/linux
+          set +e
+          timeout 40m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --geomcheck > geomcheck.log 2>&1
+          code=$?
+          set -e
+          grep -E "ZFIGHT|GEOMCHECK|SCRIPT ERROR|QUIT_CLEAN" geomcheck.log | head -150 || true
+          echo "exit code: $code"
+          test $code -eq 0
+          grep -q "GEOMCHECK .* problems=0" geomcheck.log
 
       - name: Check packages
         run: |
@@ -101,6 +117,7 @@ jobs:
             build/linux/autotest.log
             build/linux/autotest.txt
             build/linux/flowtest.log
+            build/linux/geomcheck.log
           if-no-files-found: ignore
 
       - name: Create GitHub Release

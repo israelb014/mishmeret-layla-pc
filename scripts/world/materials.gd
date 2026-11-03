@@ -94,6 +94,23 @@ func glass() -> StandardMaterial3D:
 	cache["glass"] = m
 	return m
 
+## Painted curb: one striped texture (two colours along its length), mipmapped and sampled with
+## anisotropic filtering, so distant stripes blend smoothly instead of shimmering.
+func curb_stripes(a: Color, b: Color) -> StandardMaterial3D:
+	var k := "curb|%s|%s" % [a.to_html(), b.to_html()]
+	if cache.has(k): return cache[k]
+	var img := Image.create(128, 8, false, Image.FORMAT_RGBA8)
+	img.fill_rect(Rect2i(0, 0, 64, 8), a)
+	img.fill_rect(Rect2i(64, 0, 64, 8), b)
+	img.generate_mipmaps()
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = ImageTexture.create_from_image(img)
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	m.texture_repeat = true
+	m.roughness = 0.62
+	cache[k] = m
+	return m
+
 ## Rim-light pass added on top of a character material (enemies read against any background)
 func rim(color: Color, strength: float) -> ShaderMaterial:
 	var m := ShaderMaterial.new()

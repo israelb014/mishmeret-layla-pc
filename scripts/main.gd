@@ -29,6 +29,8 @@ var quitting := false
 var showcase_busy := false # a stage's viewpoints are being added to the live background
 var results_stage := -1
 var flow := {} # --flowtest driver state
+var hud_errors := {} # CI HUD audit: problem -> times seen
+var hud_checks := 0
 const STATUS := {"tex": "טוען טקסטורות", "char": "טוען דמויות ואנימציות", "model": "טוען מודלים", "sky": "טוען שמיים"}
 
 func _ready() -> void:
@@ -44,6 +46,7 @@ func _ready() -> void:
 	game.setup(self)
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	ui.backdrop.game = game
+	ui.threat_layer.game = game # threat rings + score popups (was never wired up before v1.0.3)
 	var args := OS.get_cmdline_args() + OS.get_cmdline_user_args()
 	if args.has("--benchmark"):
 		bench = {"kind": "benchmark", "results": []}
@@ -55,6 +58,8 @@ func _ready() -> void:
 		bench = {"kind": "shots", "results": []}
 	elif args.has("--flowtest"):
 		bench = {"kind": "flow", "results": []}
+	elif args.has("--geomcheck"):
+		bench = {"kind": "geomcheck", "results": []}
 	get_tree().set_auto_accept_quit(false)
 	await _boot()
 
@@ -614,6 +619,41 @@ func _attach_bot() -> void:
 	flow["zone_f0"] = Engine.get_process_frames()
 	flow["zone"] = -1
 
+## CI: builds every zone of every stage (both branches) and scans it for z-fighting faces.
+func _geomcheck() -> void:
+	var gc := GeomCheck.new()
+	var total := 0
+	var zones := 0
+	for si in 3:
+		await ensure_stage(si)
+		if quitting: return
+		for id in game.prebuilt:
+			var z: Zone = game.prebuilt[id]
+			var probs := gc.check_zone(z)
+			zones += 1
+			total += probs.size()
+			for p in probs: print("ZFIGHT zone %s: %s" % [id, p])
+			await get_tree().process_frame
+		# the live-background copies of the viewpoint zones are built by the same code
+	print("GEOMCHECK zones=%d triangles=%d problems=%d" % [zones, gc.tris, total])
+	quit_game(0 if total == 0 else 3)
+
+## Every half second of an active fight: is every HUD element there (CI only).
+func _hud_audit() -> void:
+	if Engine.get_physics_frames() % 60 != 0: return
+	if game.state != "playing" or game.encounter == null or game.encounter["done"] or game.paused: return
+	hud_checks += 1
+	for p in ui.hud_audit(game, aiming):
+		hud_errors[p] = int(hud_errors.get(p, 0)) + 1
+
+func _hud_report() -> bool:
+	if ui.callout_count == 0: hud_errors["no Hebrew callout was ever shown"] = 1
+	if ui.threat_layer.popup_count == 0: hud_errors["no score popup was ever shown"] = 1
+	if hud_checks == 0: hud_errors["HUD never audited"] = 1
+	print("HUD_CHECK checks=%d callouts=%d popups=%d problems=%d" % [hud_checks, ui.callout_count, ui.threat_layer.popup_count, hud_errors.size()])
+	for k in hud_errors: print("HUD_PROBLEM %s (x%d)" % [k, hud_errors[k]])
+	return hud_errors.is_empty()
+
 func _flow_tick() -> void:
 	if quitting: return
 	var f := Engine.get_process_frames()
@@ -623,6 +663,7 @@ func _flow_tick() -> void:
 		start_run("normal")
 		return
 	if mode != "game": return
+	_hud_audit()
 	if game.state == "intro": game.rail.time = game.rail.duration
 	if game.zone_idx != int(flow.get("zone", -1)):
 		flow["zone"] = game.zone_idx
@@ -636,7 +677,7 @@ func _flow_tick() -> void:
 			print("FLOW stage %d cleared" % (results_stage + 1))
 			if results_stage >= 2:
 				print("FLOW_DONE stages=%d zones=%d" % [flow["stages"], flow["zones"]])
-				quit_game(0)
+				quit_game(0 if _hud_report() else 3)
 			else:
 				after_results()
 		return
@@ -659,6 +700,9 @@ static func perf_stats(ft: PackedFloat32Array) -> Dictionary:
 
 # ------------------------------------------------------------------ benchmark / autotest / screenshots
 func _run_bench() -> void:
+	if bench["kind"] == "geomcheck":
+		await _geomcheck()
+		return
 	var plan := []
 	var only := []
 	for a in OS.get_cmdline_user_args():
@@ -702,6 +746,7 @@ func _bench_next() -> void:
 
 func _bench_tick() -> void:
 	if not bench.get("running", false): return
+	if bench["kind"] == "autotest": _hud_audit()
 	var z := game.zone_idx
 	if game.state == "intro":
 		game.rail.time = game.rail.duration
@@ -771,4 +816,5 @@ func _bench_finish() -> void:
 	if f: f.store_string(out); f.close()
 	print(out)
 	print("BENCH_DONE ", path)
-	quit_game(0 if int(bench.get("errors", 0)) == 0 else 3)
+	var hud_ok := _hud_report() if bench["kind"] == "autotest" else true
+	quit_game(0 if int(bench.get("errors", 0)) == 0 and hud_ok else 3)

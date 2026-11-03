@@ -26,6 +26,7 @@ var title_layer := Control.new()
 var perf_label := Label.new()
 var loading_status: Label
 var backdrop := Showcase.new()
+var callout_count := 0 # callouts shown this session (CI HUD audit)
 const TIPS := [
 	"ירי בנשק שביד האויב מנטרל אותו ומזכה ב־300 נקודות",
 	"רימון שנורה באוויר מתפוצץ בלי לפגוע בכם",
@@ -237,6 +238,38 @@ func _place(c: Control, preset: int, r: Rect2) -> void:
 	c.offset_right = r.position.x + r.size.x
 	c.offset_bottom = r.position.y + r.size.y
 
+## CI HUD audit (autotest / flow test): returns what is missing while a fight is on screen.
+## Every element must be in the visible tree; nothing opaque may cover the HUD.
+func hud_audit(game: Node, aiming: bool) -> Array:
+	var bad := []
+	var need := {"score": score_label, "zone progress ring": zone_ring, "shields": shields_box,
+		"ammo icons": bullets, "weapon": weapon_label, "weapon icon": weapon_icon, "callouts": callouts, "threat layer": threat_layer}
+	for k in need:
+		var c: Control = need[k]
+		if c == null or not c.is_visible_in_tree(): bad.append("%s hidden" % k)
+	if score_label and score_label.text == "": bad.append("score empty")
+	if shields_box.get_child_count() != 5: bad.append("shields: %d icons" % shields_box.get_child_count())
+	if bullets.get_child_count() == 0: bad.append("ammo icons: none")
+	if weapon_label.text == "" or weapon_icon.texture == null: bad.append("weapon name/icon empty")
+	if game.scoring.multiplier() > 1 and (combo_label.text == "" or not combo_label.is_visible_in_tree()): bad.append("combo chip missing")
+	if game.boss != null and game.boss.alive and not boss_box.is_visible_in_tree(): bad.append("boss health bar hidden")
+	if aiming and not crosshair.is_visible_in_tree(): bad.append("crosshair hidden")
+	if backdrop.visible: bad.append("live background covers the game")
+	if screens.get_child_count() > 0 and screens.mouse_filter == Control.MOUSE_FILTER_STOP: bad.append("a screen covers the game")
+	if threat_layer.game == null: bad.append("threat layer has no game")
+	# every living enemy with an active threat that is on screen must have its ring
+	var cam: Camera3D = game.camera
+	var targets: Array = threat_layer.ring_targets()
+	var vs := get_viewport().get_visible_rect().size
+	for a in game.actors:
+		if not a.is_enemy or not a.alive or a.threat == null or not a.c.visible: continue
+		var p: Vector3 = a.ring_anchor()
+		if cam.is_position_behind(p): continue
+		var sp := cam.unproject_position(p)
+		if sp.x < 0 or sp.y < 0 or sp.x > vs.x or sp.y > vs.y: continue
+		if not targets.has(a): bad.append("threat ring missing (%s)" % a.kind)
+	return bad
+
 func hud_show(v: bool) -> void:
 	hud.visible = v
 	threat_layer.visible = v
@@ -293,6 +326,7 @@ func hud_flash_ammo() -> void:
 	tw.parallel().tween_property(ammo_box, "modulate", Color.WHITE, 0.4)
 
 func callout(text: String, style := "info", sub := "") -> void:
+	callout_count += 1
 	var col := Color.WHITE
 	var size := 54
 	match style:

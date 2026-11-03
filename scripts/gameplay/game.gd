@@ -78,8 +78,8 @@ func setup(m: Node) -> void:
 	stage_root.name = "Stage"
 	camera.current = true
 	camera.fov = 62.0
-	camera.near = 0.08
-	camera.far = 400.0
+	camera.near = 0.2 # depth precision: nothing is ever closer than 20 cm to the camera
+	camera.far = 300.0 # set per stage from its fog distance (far_for)
 	camera.attributes = cam_attr
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
@@ -211,6 +211,11 @@ func setup_stage(index: int, menu := false) -> void:
 
 func _apply_environment(def: Dictionary) -> void:
 	apply_environment_to(def, env, sun, cam_attr)
+	camera.far = far_for(def)
+
+## Far plane = where the stage's fog becomes opaque (nothing beyond is visible; sky unaffected).
+static func far_for(def: Dictionary) -> float:
+	return clampf(float(def["fog"][2]) * 1.4, 250.0, 500.0)
 
 ## Sky, fog, tonemapping and sun of a stage, applied to any WorldEnvironment/sun/camera
 ## attributes (the game world, or the live loading/menu background in its own world).
