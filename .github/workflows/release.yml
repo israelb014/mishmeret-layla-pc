@@ -46,26 +46,59 @@ jobs:
           timeout 100m ~/godot/godot --headless --path . --import || true
           test -d .godot/imported
 
-      - name: Check texture compression (fail on uncompressed textures > 256 px)
+      - name: Render the bundled loading-screen shots (software GL, no HUD)
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri >/dev/null
+          mkdir -p assets/loading
+          LOADSHOTS_DIR=$PWD/assets/loading BENCH_OUT=/tmp/loadshots.txt xvfb-run -a -s "-screen 0 1280x720x24" \
+            timeout 45m ~/godot/godot --path . --rendering-driver opengl3 --rendering-method gl_compatibility --fixed-fps 60 -- --loadshots --windowed 2>&1 \
+            | grep -E "LOADSHOT|SCRIPT ERROR|QUIT_CLEAN" || true
+          ls -la assets/loading
+
+      - name: Import the loading shots
+        run: |
+          python3 tools/fix-texture-imports.py
+          timeout 30m ~/godot/godot --headless --path . --import || true
+
+      - name: Check texture compression (fail on any uncompressed 3D texture)
         run: |
           python3 tools/check-ctex.py
-          echo "imported data: $(du -sh .godot/imported | cut -f1)"; ls -S -l .godot/imported | head -15
+          echo "imported data: $(du -sh .godot/imported | cut -f1)"; ls -S -l .godot/imported | head -12
 
       - name: Export and package (Linux + Windows, embedded PCK)
         run: GODOT=$HOME/godot/godot sh tools/package.sh
 
-      - name: Automated playthrough of the exported Linux build (headless, every zone, both branches, bosses)
+      - name: Automated playthrough of the exported Linux build (every zone, both branches, bosses)
         run: |
-          set -o pipefail
           cd build/linux
-          BENCH_OUT=$PWD/autotest.txt timeout 60m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --autotest 2>&1 | tee autotest.log | grep -E "LOAD_TIME_MS|BENCH_STUCK|SCRIPT ERROR|zones:" || true
+          set +e
+          BENCH_OUT=$PWD/autotest.txt timeout 60m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --autotest > autotest.log 2>&1
+          code=$?
+          set -e
+          grep -E "LOAD_TIME_MS|STAGE_WAIT_MS|BENCH_STUCK|SCRIPT ERROR|zones:|QUIT_CLEAN|Aborted|core dumped" autotest.log || true
           echo "---- errors (exit-time leak reports excluded) ----"
           grep -E "SCRIPT ERROR|^ERROR" autotest.log | grep -vE "leaked|still in use at exit|Pages in use" | sort | uniq -c | head -40 || true
+          echo "exit code: $code"
+          test $code -eq 0
           grep -q "stuck: 0" autotest.log
           grep -E "zones: 30 " autotest.log
-          ! grep -q "SCRIPT ERROR" autotest.log
-          ! grep -q "not supported by hardware" autotest.log
-          grep -E "LOAD_TIME_MS=" autotest.log
+          grep -q "QUIT_CLEAN code=0" autotest.log
+          ! grep -qE "SCRIPT ERROR|Aborted|core dumped|not supported by hardware" autotest.log
+
+      - name: Real player flow of the exported Linux build (menu -> stages 1-3 -> ending, quit)
+        run: |
+          cd build/linux
+          set +e
+          timeout 60m ./MishmeretLayla.x86_64 --headless --fixed-fps 60 -- --flowtest > flowtest.log 2>&1
+          code=$?
+          set -e
+          grep -E "LOAD_TIME_MS|MENU_LIVE_MS|STAGE_WAIT_MS|FLOW|ready at|QUIT_CLEAN|SCRIPT ERROR|Aborted|core dumped" flowtest.log || true
+          echo "exit code: $code"
+          test $code -eq 0
+          grep -q "FLOW_DONE stages=3" flowtest.log
+          grep -q "QUIT_CLEAN code=0" flowtest.log
+          ! grep -qE "SCRIPT ERROR|Aborted|core dumped" flowtest.log
 
       - name: Check packages
         run: |
@@ -81,6 +114,8 @@ jobs:
           path: |
             build/linux/autotest.log
             build/linux/autotest.txt
+            build/linux/flowtest.log
+            assets/loading/*.jpg
           if-no-files-found: ignore
 
       - name: Create GitHub Release

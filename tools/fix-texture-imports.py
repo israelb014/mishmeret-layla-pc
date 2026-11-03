@@ -3,7 +3,7 @@
 # textures it extracts from .glb files).
 #   larger than 256 px  -> VRAM compressed: S3TC/BC (BC1/BC3), normal maps BC5 (RGTC), mipmaps
 #   .hdr                -> VRAM compressed, high quality: BC6H (BPTC)
-#   tiny palettes       -> left lossless (Kenney "colormap" atlases would bleed with BC blocks)
+#   small textures      -> compressed as well (no RGB8 conversion warnings at load time)
 # "detect_3d" is disabled everywhere: it only switches to VRAM compression inside the editor UI,
 # never in a headless import, which is how the v1.0.0 textures ended up uncompressed.
 import os, re, sys
@@ -70,14 +70,8 @@ for root, dirs, files in os.walk('.'):
         hdr = src.lower().endswith(('.hdr', '.exr'))
         if src.lower().endswith('.svg'):
             continue # UI icons (2D)
-        if not hdr:
-            w, h = Image.open(src).size
-            if max(w, h) <= 256:
-                small += 1
-                new = setp(setp(text, 'compress/mode', 0), 'detect_3d/compress_to', 0)
-                if new != text:
-                    open(path, 'w').write(new)
-                continue
+        if not hdr and max(Image.open(src).size) <= 256:
+            small += 1 # small tiles are compressed too (v1.0.1 left two RGB8 64x64 tiles lossless)
         new = text
         new = setp(new, 'compress/mode', 2)
         new = setp(new, 'compress/high_quality', 'true' if hdr else 'false')
@@ -88,4 +82,4 @@ for root, dirs, files in os.walk('.'):
         if new != text:
             open(path, 'w').write(new)
             changed += 1
-print('texture imports updated:', changed, '| small (kept lossless):', small)
+print('texture imports updated:', changed, '| of them small (<= 256 px):', small)

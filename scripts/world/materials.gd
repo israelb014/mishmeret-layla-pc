@@ -42,6 +42,8 @@ func get_mat(set_name: String, color := Color.WHITE, scale := 4.0, metallic := 0
 	m.normal_texture = load("res://assets/tex/%s/normal.jpg" % set_name)
 	m.orm_texture = load("res://assets/tex/%s/orm.jpg" % set_name)
 	m.metallic = metallic
+	if set_name == "tiles":
+		m.roughness = 0.45 # polished station floor: the one large surface that gets SSR
 	m.uv1_triplanar = true
 	m.uv1_world_triplanar = true
 	m.uv1_scale = Vector3.ONE / scale

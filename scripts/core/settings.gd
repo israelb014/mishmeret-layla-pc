@@ -3,12 +3,15 @@ extends Node
 
 const PATH := "user://settings.cfg"
 const CROSSHAIR := {"amber": Color("#ffb020"), "cyan": Color("#2ee6ff"), "lime": Color("#8cff3a"), "magenta": Color("#ff3fb4")}
+## SDFGI and SSIL are off on every preset: on a camera that never stops, their temporal
+## accumulation never settles (shimmering light). SDFGI stays as a manual toggle.
 const PRESETS := {
-	"low": {"sdfgi": false, "ssr": false, "ssao": false, "ssil": false, "vfog": false, "shadows": 0, "aa": "fxaa", "fsr": "off", "glow": true, "lamp_shadows": false, "particles": 0.5, "lod_bias": 0.6},
-	"medium": {"sdfgi": false, "ssr": true, "ssao": true, "ssil": false, "vfog": true, "shadows": 1, "aa": "taa", "fsr": "off", "glow": true, "lamp_shadows": false, "particles": 0.75, "lod_bias": 1.0},
-	"high": {"sdfgi": true, "ssr": true, "ssao": true, "ssil": true, "vfog": true, "shadows": 2, "aa": "taa", "fsr": "off", "glow": true, "lamp_shadows": true, "particles": 1.0, "lod_bias": 1.5},
-	"ultra": {"sdfgi": true, "ssr": true, "ssao": true, "ssil": true, "vfog": true, "shadows": 3, "aa": "taa", "fsr": "off", "glow": true, "lamp_shadows": true, "particles": 1.0, "lod_bias": 2.5},
+	"low": {"sdfgi": false, "ssr": false, "ssao": false, "ssil": false, "vfog": false, "shadows": 0, "aa": "smaa", "fsr": "off", "glow": true, "lamp_shadows": false, "particles": 0.5, "lod_bias": 0.6},
+	"medium": {"sdfgi": false, "ssr": true, "ssao": true, "ssil": false, "vfog": true, "shadows": 1, "aa": "msaa_smaa", "fsr": "off", "glow": true, "lamp_shadows": false, "particles": 0.75, "lod_bias": 1.0},
+	"high": {"sdfgi": false, "ssr": true, "ssao": true, "ssil": false, "vfog": true, "shadows": 2, "aa": "msaa_smaa", "fsr": "off", "glow": true, "lamp_shadows": true, "particles": 1.0, "lod_bias": 1.5},
+	"ultra": {"sdfgi": false, "ssr": true, "ssao": true, "ssil": false, "vfog": true, "shadows": 3, "aa": "msaa_smaa", "fsr": "off", "glow": true, "lamp_shadows": true, "particles": 1.0, "lod_bias": 2.5},
 }
+const VERSION := 2
 
 var data := {
 	"display": "borderless", # window | fullscreen | borderless
@@ -17,7 +20,8 @@ var data := {
 	"fps_limit": 0, # 0 = unlimited, else 60/120/144
 	"preset": "auto", # low | medium | high | ultra | auto
 	"resolved": "", # what "auto" measured last time
-	"sdfgi": true, "ssr": true, "ssao": true, "ssil": true, "vfog": true, "shadows": 2, "aa": "taa", "fsr": "off",
+	"sdfgi": false, "ssr": true, "ssao": true, "ssil": false, "vfog": true, "shadows": 2, "aa": "msaa_smaa", "fsr": "off",
+	"version": VERSION,
 	"music": 0.6, "sfx": 0.8, "crosshair": "amber", "shake": true,
 	"unlocked": 1, "highscores": [],
 }
@@ -44,6 +48,12 @@ func _load() -> void:
 		for k in data.keys():
 			if cfg.has_section_key("s", k):
 				data[k] = cfg.get_value("s", k)
+		if int(cfg.get_value("s", "version", 1)) < VERSION:
+			# v1.0.0/1.0.1 defaults (SDFGI, SSIL, TAA) caused shimmering: reset the graphics options
+			for k in ["sdfgi", "ssil", "aa", "fsr"]:
+				data[k] = PRESETS[effective_preset()][k]
+			data["version"] = VERSION
+			save()
 
 func save() -> void:
 	var cfg := ConfigFile.new()
@@ -119,9 +129,14 @@ func apply_display() -> void:
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if data["vsync"] else DisplayServer.VSYNC_DISABLED)
 	Engine.max_fps = int(data["fps_limit"])
 	var vp := get_viewport()
-	vp.use_taa = data["aa"] == "taa"
-	vp.msaa_3d = Viewport.MSAA_4X if data["aa"] == "msaa" else Viewport.MSAA_DISABLED
-	vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA if data["aa"] == "fxaa" else Viewport.SCREEN_SPACE_AA_DISABLED
+	# default MSAA 4x + SMAA (stable on a moving camera); TAA only when chosen manually
+	var aa := String(data["aa"])
+	vp.use_taa = aa == "taa"
+	vp.msaa_3d = Viewport.MSAA_4X if aa in ["msaa_smaa", "msaa"] else Viewport.MSAA_DISABLED
+	match aa:
+		"msaa_smaa", "smaa": vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_SMAA
+		"fxaa": vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_FXAA
+		_: vp.screen_space_aa = Viewport.SCREEN_SPACE_AA_DISABLED
 	match String(data["fsr"]):
 		"quality":
 			vp.scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2

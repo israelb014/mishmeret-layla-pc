@@ -1,4 +1,4 @@
-# CI gate: every imported texture larger than 256x256 must be VRAM-compressed (BC/BPTC/RGTC).
+# CI gate: every imported 3D texture must be VRAM-compressed (BC/BPTC/RGTC), whatever its size.
 # Parses the CompressedTexture2D header (.ctex "GST2") of everything in .godot/imported and exits
 # non-zero, listing the offenders, if any is stored as raw/PNG/WebP (RGB8, RGBA8, ...).
 # UI icons rasterized from SVG are 2D and exempt.
@@ -26,7 +26,7 @@ for path in sorted(glob.glob('.godot/imported/*.ctex')):
     if '.svg-' in name:
         continue
     compressed = data_format in (0, 3) and fmt >= 17
-    if max(w, hh) > 256 and not compressed:
+    if not compressed:
         bad.append((name, '%dx%d %s %s' % (w, hh, dname, fname)))
 print('textures:', total)
 for k, v in sorted(stats.items()):
@@ -34,8 +34,8 @@ for k, v in sorted(stats.items()):
 if total == 0:
     print('FAIL: no imported textures found'); sys.exit(1)
 if bad:
-    print('FAIL: %d textures larger than 256x256 are not VRAM-compressed:' % len(bad))
+    print('FAIL: %d textures are not VRAM-compressed:' % len(bad))
     for n, why in bad:
         print('  ', n, why)
     sys.exit(1)
-print('OK: every texture larger than 256x256 is VRAM-compressed')
+print('OK: every 3D texture is VRAM-compressed')

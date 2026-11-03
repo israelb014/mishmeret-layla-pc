@@ -298,6 +298,31 @@ func _find_windows(n: Node, out: Array) -> void:
 		_find_windows(c, out)
 
 # ------------------------------------------------------------------ probe, decals
+## Non-shadowed fill lights beside the camera path (start and end of the zone, both sides):
+## they replace the bounce light SDFGI used to add, so shadowed sides stay readable. No
+## specular, so they never show up as hot spots.
+func _add_fill_lights() -> void:
+	var path: Array = def.get("path", [])
+	if path.is_empty(): return
+	var hemi: Array = stage.get("hemi", [0xdfefff, 0x6b5a48, 0.35])
+	var col := U.col(hemi[0]).lerp(Color(1.0, 0.93, 0.82), 0.5)
+	var energy := 0.75 if night else 0.45
+	var pts := [U.v3(path[0]), U.v3(path[path.size() - 1])]
+	for p in pts:
+		for side in [-1.0, 1.0]:
+			var l := OmniLight3D.new()
+			l.position = p + Vector3(side * 6.0, 2.6, -4.0)
+			l.omni_range = 18.0
+			l.omni_attenuation = 0.8
+			l.light_energy = energy
+			l.light_color = col
+			l.light_specular = 0.0
+			l.shadow_enabled = false
+			l.distance_fade_enabled = true
+			l.distance_fade_begin = 70.0
+			l.distance_fade_length = 15.0
+			static_root.add_child(l)
+
 func _add_probe_and_decals() -> void:
 	# reflection probe covering the zone's playable area (wet road, glass, station floor)
 	probe = ReflectionProbe.new()
@@ -308,7 +333,10 @@ func _add_probe_and_decals() -> void:
 	probe.intensity = 0.9
 	probe.max_distance = 90
 	probe.enable_shadows = false
+	# the probe also lights its box (ambient from what it captured): local, stable bounce light
+	probe.ambient_mode = ReflectionProbe.AMBIENT_ENVIRONMENT
 	static_root.add_child(probe)
+	_add_fill_lights()
 	# dirt and puddles on the ground (city and port), scattered deterministically
 	if game.decal_tex.is_empty():
 		return

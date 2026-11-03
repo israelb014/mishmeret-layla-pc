@@ -25,6 +25,18 @@ var callouts := VBoxContainer.new()
 var title_layer := Control.new()
 var perf_label := Label.new()
 var loading_status: Label
+var backdrop := Slideshow.new()
+var shots_dirty := true
+const TIPS := [
+	"ירי בנשק שביד האויב מנטרל אותו ומזכה ב־300 נקודות",
+	"רימון שנורה באוויר מתפוצץ בלי לפגוע בכם",
+	"פגיעה בראש שווה פי שניים",
+	"חבית אדומה מפילה את כל מי שעומד לידה",
+	"שחררו בן ערובה בלי לפגוע בו וקבלו 500 נקודות",
+	"ירייה בשלט בוחרת את המסלול שלכם",
+	"רצף פגיעות בלי החטאה מכפיל את הניקוד עד פי 4",
+	"טעינה: מקש ימני בעכבר, R או רווח",
+]
 # HUD widgets
 var shields_box := HBoxContainer.new()
 var score_label: Label
@@ -59,7 +71,9 @@ func setup(m: Node) -> void:
 	threat_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
 	threat_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	threat_layer.font = font_title; threat_layer.font_ui = font_ui
-	for c in [threat_layer, hud, flash, title_layer, screens]:
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	backdrop.visible = false
+	for c in [threat_layer, hud, flash, title_layer, backdrop, screens]:
 		c.set_anchors_preset(Control.PRESET_FULL_RECT)
 		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		root.add_child(c)
@@ -429,32 +443,54 @@ func _appear(n: Control) -> void:
 	n.modulate.a = 0.0
 	n.create_tween().tween_property(n, "modulate:a", 1.0, 0.35)
 
-func loading() -> Ring:
-	var c := _screen()
-	(screens.get_child(0) as ColorRect).color = INK
-	var v := _vbox(18)
-	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	var r := Ring.new()
-	r.custom_minimum_size = Vector2(220, 220)
-	r.font = font_title; r.font_size = 50; r.thickness = 12
-	r.label = "0%"; r.sub = "טוען"
-	r.set_process(false)
-	r.glide_to(0.0)
-	var rc := CenterContainer.new(); rc.add_child(r)
-	v.add_child(rc)
-	loading_status = _label("טוען", 26, false, AMBER)
-	loading_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+## Live loading screen: in-game shots cross-fading behind the title, a status line, a tip and a
+## thin progress line. Returns the line (Main feeds it real progress through set_loading).
+func loading() -> ProgressLine:
+	clear_screen()
+	set_backdrop(true)
+	screens.mouse_filter = Control.MOUSE_FILTER_STOP
+	var root_c := Control.new()
+	root_c.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root_c.mouse_filter = Control.MOUSE_FILTER_STOP
+	root_c.layout_direction = Control.LAYOUT_DIRECTION_LTR # explicit corners; texts stay RTL
+	screens.add_child(root_c)
+	var title := _label("משמרת לילה", 120, true)
+	title.add_theme_color_override("font_shadow_color", Color("#b4570b")); title.add_theme_constant_override("shadow_offset_y", 6)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	title.text_direction = Control.TEXT_DIRECTION_RTL
+	_place(title, Control.PRESET_TOP_RIGHT, Rect2(-1100, 50, 1040, 150))
+	root_c.add_child(title)
+	loading_status = _label("טוען", 24, false, AMBER)
+	loading_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	loading_status.text_direction = Control.TEXT_DIRECTION_RTL
-	v.add_child(loading_status)
-	var logo := _label("משמרת לילה", 84, true)
-	logo.add_theme_color_override("font_shadow_color", Color("#b4570b")); logo.add_theme_constant_override("shadow_offset_y", 5)
-	logo.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(logo)
-	var tip := _label("טיפ: ירי בנשק שביד האויב מנטרל אותו ומזכה ב־300 נקודות", 20, false, MUTED)
+	_place(loading_status, Control.PRESET_BOTTOM_RIGHT, Rect2(-760, -112, 700, 34))
+	root_c.add_child(loading_status)
+	var tip := _label(String(TIPS[randi() % TIPS.size()]), 26, false, TEXT)
 	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(tip)
-	c.add_child(v)
-	return r
+	tip.text_direction = Control.TEXT_DIRECTION_RTL
+	_place(tip, Control.PRESET_CENTER_BOTTOM, Rect2(-700, -70, 1400, 40))
+	root_c.add_child(tip)
+	var line := ProgressLine.new()
+	_place(line, Control.PRESET_BOTTOM_WIDE, Rect2(0, -6, 0, 6))
+	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root_c.add_child(line)
+	return line
+
+## The in-game shots behind loading, the menu (until stage 1 is live) and the results screen.
+func set_backdrop(on: bool, fade := 0.0) -> void:
+	if on:
+		if shots_dirty:
+			backdrop.set_shots(Slideshow.load_shots())
+			shots_dirty = false
+		backdrop.modulate.a = 1.0
+		backdrop.visible = true
+	elif backdrop.visible:
+		if fade <= 0.0:
+			backdrop.visible = false
+		else:
+			var tw := create_tween()
+			tw.tween_property(backdrop, "modulate:a", 0.0, fade)
+			tw.tween_callback(func(): backdrop.visible = false)
 
 ## progress 0..1 with real per-file progress, plus a Hebrew status line
 func set_loading(r, frac: float, status := "") -> void:
@@ -490,7 +526,7 @@ func menu() -> void:
 	v.add_child(_btn("שיאים", "trophy", highscores.bind(-1, menu)))
 	v.add_child(_btn("הגדרות", "gear", settings_screen.bind(menu)))
 	v.add_child(_btn("קרדיטים", "info", credits))
-	v.add_child(_btn("יציאה", "exit", func(): main.get_tree().quit()))
+	v.add_child(_btn("יציאה", "exit", func(): main.quit_game()))
 	v.add_child(_label("עכבר: כיוון וירי · R / רווח / קליק ימני: טעינה · Esc: השהיה · F1: מד ביצועים", 17, false, MUTED))
 	h.add_child(v)
 	_appear(v)
@@ -642,11 +678,11 @@ func settings_screen(back: Callable) -> void:
 	tabs.add_child(_row("הגבלת תמונות לשנייה", "clock", _seg([[60, "60"], [120, "120"], [144, "144"], [0, "ללא"]], S.g("fps_limit"), func(val): apply_gfx.call("fps_limit", val))))
 	tabs.add_child(_row("איכות גרפיקה", "monitor", _seg([["auto", "אוטומטי"], ["low", "נמוך"], ["medium", "בינוני"], ["high", "גבוה"], ["ultra", "אולטרה"]], S.g("preset"), func(val):
 		S.apply_preset(val); S.apply_display(); main.game.refresh_graphics(); settings_screen(back))))
-	tabs.add_child(_row("תאורה גלובלית (SDFGI)", "star", _toggle(bool(S.g("sdfgi")), func(on): apply_gfx.call("sdfgi", on))))
+	tabs.add_child(_row("תאורה עקיפה ניסיונית", "star", _toggle(bool(S.g("sdfgi")), func(on): apply_gfx.call("sdfgi", on))))
 	tabs.add_child(_row("השתקפויות (SSR)", "star", _toggle(bool(S.g("ssr")), func(on): apply_gfx.call("ssr", on))))
 	tabs.add_child(_row("ערפל נפחי", "star", _toggle(bool(S.g("vfog")), func(on): apply_gfx.call("vfog", on))))
 	tabs.add_child(_row("איכות צללים", "star", _seg([[0, "כבוי"], [1, "נמוכה"], [2, "גבוהה"], [3, "אולטרה"]], S.g("shadows"), func(val): apply_gfx.call("shadows", val))))
-	tabs.add_child(_row("החלקת קצוות", "crosshair", _seg([["taa", "TAA"], ["msaa", "MSAA ×4"], ["fxaa", "FXAA"], ["off", "כבוי"]], S.g("aa"), func(val): apply_gfx.call("aa", val))))
+	tabs.add_child(_row("החלקת קצוות", "crosshair", _seg([["msaa_smaa", "MSAA ×4 + SMAA"], ["msaa", "MSAA ×4"], ["smaa", "SMAA"], ["fxaa", "FXAA"], ["taa", "TAA"], ["off", "כבוי"]], S.g("aa"), func(val): apply_gfx.call("aa", val))))
 	tabs.add_child(_row("FSR 2", "monitor", _seg([["off", "כבוי"], ["quality", "איכות"], ["balanced", "מאוזן"], ["performance", "ביצועים"]], S.g("fsr"), func(val): apply_gfx.call("fsr", val))))
 	for k in [["music", "עוצמת מוזיקה", "music"], ["sfx", "עוצמת אפקטים", "speaker"]]:
 		var sl := HSlider.new(); sl.min_value = 0; sl.max_value = 1; sl.step = 0.05; sl.value = float(S.g(k[0]))
@@ -731,6 +767,7 @@ func show_game_over(left: int, score: int) -> void:
 
 func show_results(d: Dictionary) -> void:
 	var c := _screen()
+	set_backdrop(true) # opaque: the next stage is prepared behind it
 	var v := _vbox(16)
 	v.add_child(_title("%s — הושלם" % d["stage"]["title"]))
 	var h := HBoxContainer.new(); h.add_theme_constant_override("separation", 18)

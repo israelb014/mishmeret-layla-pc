@@ -21,6 +21,7 @@ var rail: Rail
 var font_title: Font
 var water_material: ShaderMaterial
 var decal_tex := {}
+var warming := false # Main is rendering a stage off-screen (shader warm-up): rail/simulation idle
 var graffiti_tex := {} # word -> ImageTexture (spray tag rendered with Secular One during loading)
 var stages: Array = []
 var prebuilt := {}
@@ -228,6 +229,11 @@ func _apply_environment(def: Dictionary) -> void:
 	e.ambient_light_color = U.col(hemi[0]).lerp(U.col(hemi[1]), 0.35)
 	e.ambient_light_sky_contribution = 0.6
 	e.ambient_light_energy = float(def.get("envIntensity", 1.0)) * (1.0 + float(hemi[2]) * 1.6)
+	if not Settings.g("sdfgi"):
+		# no (temporally noisy) GI: stable sky light carries the bounce instead, so shadowed
+		# facades stay readable like the browser edition; zones add probes + fill lights
+		e.ambient_light_energy *= 1.4
+		e.ambient_light_sky_contribution = 0.7
 	e.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	e.tonemap_mode = Environment.TONE_MAPPER_AGX
 	e.tonemap_exposure = float(def.get("exposure", 1.0)) * 1.05
@@ -237,7 +243,9 @@ func _apply_environment(def: Dictionary) -> void:
 	e.adjustment_contrast = 1.06
 	e.ssao_enabled = bool(Settings.g("ssao")); e.ssao_radius = 1.2; e.ssao_intensity = 1.6; e.ssao_light_affect = 0.15
 	e.ssil_enabled = bool(Settings.g("ssil")); e.ssil_intensity = 0.8
-	e.ssr_enabled = bool(Settings.g("ssr")); e.ssr_max_steps = 64; e.ssr_fade_in = 0.15; e.ssr_fade_out = 2.0
+	# SSR only shows on smooth surfaces (glass, puddle decals, polished station floor); rough-surface
+	# SSR is disabled in project settings, full resolution, enough steps that it does not sparkle
+	e.ssr_enabled = bool(Settings.g("ssr")); e.ssr_max_steps = 96; e.ssr_fade_in = 0.2; e.ssr_fade_out = 2.5; e.ssr_depth_tolerance = 0.4
 	e.sdfgi_enabled = bool(Settings.g("sdfgi"))
 	e.sdfgi_use_occlusion = true
 	e.sdfgi_cascades = 4
@@ -260,7 +268,9 @@ func _apply_environment(def: Dictionary) -> void:
 	e.fog_aerial_perspective = 0.4
 	e.fog_sky_affect = 0.15
 	e.volumetric_fog_enabled = bool(Settings.g("vfog"))
-	e.volumetric_fog_density = 0.012 if not def.get("night", false) else 0.02
+	# thin fog, no temporal reprojection (it ghosts on a camera that never stops); shafts stay
+	e.volumetric_fog_density = 0.006 if not def.get("night", false) else 0.01
+	e.volumetric_fog_temporal_reprojection_enabled = false
 	e.volumetric_fog_albedo = fogc.lerp(Color.WHITE, 0.4)
 	e.volumetric_fog_anisotropy = 0.6
 	e.volumetric_fog_length = 80.0
@@ -289,7 +299,17 @@ func _apply_environment(def: Dictionary) -> void:
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS if sq >= 2 else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	RenderingServer.directional_shadow_atlas_set_size([2048, 4096, 8192, 8192][sq], true)
 	RenderingServer.directional_soft_shadow_filter_set_quality([0, 2, 3, 4][sq] as RenderingServer.ShadowQuality)
-	sun.directional_shadow_max_distance = [60.0, 100.0, 140.0, 200.0][sq]
+	sun.directional_shadow_max_distance = [60.0, 90.0, 110.0, 140.0][sq]
+	# stable PSSM: fixed split distribution, blended splits, enough bias/blur to stop swimming
+	sun.directional_shadow_split_1 = 0.07
+	sun.directional_shadow_split_2 = 0.18
+	sun.directional_shadow_split_3 = 0.42
+	sun.directional_shadow_blend_splits = true
+	sun.directional_shadow_fade_start = 0.85
+	sun.directional_shadow_pancake_size = 30.0
+	sun.shadow_bias = 0.04
+	sun.shadow_normal_bias = 1.4
+	sun.shadow_blur = 1.6
 
 func clear_stage() -> void:
 	for a in actors: a.remove()
@@ -346,6 +366,15 @@ func ensure_zone(i: int) -> Zone:
 
 func refresh_graphics() -> void:
 	if not stage.is_empty(): _apply_environment(stage)
+
+## Detaches the attached zones and returns them to the prebuilt set (menu fly-through only:
+## nothing in them was changed by play).
+func return_zones_to_prebuilt() -> void:
+	for z in zones:
+		if z.is_inside_tree(): stage_root.remove_child(z)
+		z.position = Vector3(0, 0, -100000)
+		prebuilt[String(z.def["id"])] = z
+	zones.clear()
 
 func dispose_zone(z: Zone) -> void:
 	zones.erase(z)
@@ -436,6 +465,7 @@ func play_intro() -> void:
 	state = "intro"
 	main.set_aiming(true)
 	var dur := float(stage["intro"]["duration"])
+	later(minf(2.5, dur * 0.4), main.capture_shot.bind(["street", "port", "station"][stage_index]))
 	ui.stage_title(String(stage["title"]), String(stage["subtitle"]), dur, stage_index)
 	# cinematic depth of field during the intro fly-through
 	cam_attr.dof_blur_far_enabled = true
@@ -485,6 +515,7 @@ func start_encounter(z: Zone) -> void:
 		boss = Boss.new(self, d["boss"], z)
 		boss.begin()
 		actors.append(boss)
+		later(3.0, main.capture_shot.bind("boss"))
 		ui.callout(String(d["boss"].get("title", "בוס!")), "boss", "")
 	next_wave()
 
@@ -999,6 +1030,7 @@ func stage_clear() -> void:
 	run_ranks.append(rank["value"])
 	later(1.2, func(): Sfx.play_music("results"))
 	ui.show_results({"stage": stage, "stats": scoring.stage, "accuracy": scoring.accuracy(), "rank": rank, "total": scoring.total, "last": stage_index == 2})
+	main.on_stage_clear()
 
 func game_over() -> void:
 	state = "gameover"
@@ -1031,10 +1063,10 @@ func new_run(diff: String, stage_i := 0, zone := 0, skip_intro := false) -> void
 	run_ranks = []
 	start_stage(stage_i, zone, skip_intro)
 
-func next_stage() -> void:
+func next_stage(index := -1) -> void:
 	continues_used_stage = 0
 	shields = maxi(shields, 3)
-	start_stage(stage_index + 1)
+	start_stage(index if index >= 0 else stage_index + 1)
 
 func set_paused(p: bool) -> void:
 	paused = p
@@ -1044,6 +1076,7 @@ func set_paused(p: bool) -> void:
 # ------------------------------------------------------------------ frame
 ## Fixed-step simulation (called from _physics_process at 120 Hz).
 func step(dt_real: float) -> void:
+	if warming: return
 	if paused:
 		rail.update(0.0, true); return
 	if slowmo > 0.0:
